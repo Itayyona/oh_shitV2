@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Oh Sh*t 💩</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="sector_1_ui/style.css"/>
+</head>
+<body>
+
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen">
+        <div class="loading-inner">
+            <div class="loading-emoji">🚽</div>
+            <div class="loading-msg" id="loading-msg">Don't panic, I got u babe... 💩</div>
+            <div class="loading-bar"><div class="loading-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signup">
+        <div class="logo">
+            <h1>Oh Sh*t 💩</h1>
+            <p class="slogan">Nature's calling, we're here to assist</p>
+        </div>
+        <div class="bathroom-sign">
+            <div class="sign-male" onclick="startApp('male')">
+                <img src="male_marker.svg"/>
+            </div>
+            <div class="sign-divider"></div>
+            <div class="sign-female" onclick="startApp('female')">
+                <img src="female_marker.svg"/>
+            </div>
+        </div>
+    </div>
+
+    <!-- NICKNAME SCREEN -->
+    <div id="nickname-screen">
+        <div class="nickname-inner">
+            <div class="nickname-emoji">💩</div>
+            <h2>What's ur toilet name?</h2>
+            <p>Ur identity in the Oh Sh*t universe.<br/>Choose wisely. Or don't.</p>
+            <input id="nickname-input" type="text" maxlength="20" placeholder="e.g. FlushLord3000" autocomplete="off"/>
+            <button id="nickname-btn" onclick="saveNickname()">Let's go 🚽</button>
+        </div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div class="gps-dot" id="gps-dot"></div>
+        <div id="gps-status">Acquiring GPS...</div>
+    </div>
+
+    <!-- MAP -->
+    <div id="map"></div>
+
+    <!-- RECENTER BUTTON -->
+    <button id="recenter-btn" onclick="recenterMap()">📍</button>
+
+    <!-- SEARCH BUTTON -->
+    <button id="search-btn" onclick="openSearch()">🔍</button>
+
+    <!-- SEARCH BAR -->
+    <div id="search-bar">
+        <input id="search-input" type="text" placeholder="Search area or street..."/>
+        <button id="search-go" onclick="doSearch()">GO</button>
+        <button id="search-close" onclick="closeSearch()">✕</button>
+    </div>
+
+    <!-- NAV PANEL -->
+    <div id="nav-panel">
+        <div id="nav-arrow">↑</div>
+        <div id="nav-info">
+            <div id="nav-dist">—</div>
+            <div id="nav-street">—</div>
+        </div>
+        <div id="nav-eta-box">
+            <div id="nav-eta">—</div>
+            <div id="nav-mode-icon">🚶</div>
+        </div>
+        <button id="nav-stop" onclick="stopNavigation()">✕</button>
+    </div>
+
+    <!-- NEAREST BAR -->
+    <div id="nearest-bar">
+        <div id="nearest-left">
+            <div class="nb-label">NEAREST</div>
+            <div class="nb-name" id="nb-name">—</div>
+        </div>
+        <div class="nb-dist" id="nb-dist">—</div>
+        <button id="nav-btn" onclick="openTravelModal()">GO ▶</button>
+    </div>
+
+    <!-- ADD BUTTON -->
+    <button id="add-btn" onclick="openModal()">+ ADD 🚽</button>
+
+    <!-- ROLL COUNTER -->
+    <div id="roll-btn" onclick="openStore()">
+        <div class="roll-pkg-emoji">🧻</div>
+        <div class="roll-pkg-count"><span id="roll-counter">0</span></div>
+    </div>
+
+    <!-- STORE MODAL -->
+    <div id="store-modal">
+        <div class="modal-box">
+            <h3>🧻 Oh Sh*t Store</h3>
+            <div class="store-balance">You have <strong><span id="store-roll-count">0</span> 🧻</strong></div>
+            <div class="store-coming-soon">
+                <div class="store-cs-emoji">🚧</div>
+                <div class="store-cs-text">Store coming soon!</div>
+                <div class="store-cs-sub">Keep playing games to earn more 🧻 rolls</div>
+            </div>
+            <div class="store-change-name">
+                <button class="store-name-btn" onclick="openNameChange()">✏️ Change username <span class="store-cost">1500 🧻</span></button>
+            </div>
+            <button class="btn-cancel" onclick="closeStore()">Close</button>
+        </div>
+    </div>
+
+    <!-- NAME CHANGE MODAL -->
+    <div id="name-modal">
+        <div class="modal-box">
+            <h3>✏️ Change Username</h3>
+            <p class="name-modal-sub">Costs <strong>1500 🧻</strong> rolls</p>
+            <input id="name-input" type="text" maxlength="20" placeholder="New toilet name..." autocomplete="off"/>
+            <div id="name-error" class="name-error"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeNameChange()">Cancel</button>
+                <button class="btn-save" onclick="submitNameChange()">Change ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRAVEL MODE MODAL -->
+    <div id="travel-modal">
+        <div class="modal-box">
+            <h3>How are you travelling?</h3>
+            <div class="travel-options">
+                <div class="travel-btn" onclick="startNavWithMode('walk')">
+                    <div class="travel-icon">🚶</div>
+                    <div class="travel-label">Walk</div>
+                    <div class="travel-speed">on foot</div>
+                </div>
+                <div class="travel-btn" onclick="startNavWithMode('bike')">
+                    <div class="travel-icon">🚴</div>
+                    <div class="travel-label">Bike</div>
+                    <div class="travel-speed">by bike</div>
+                </div>
+                <div class="travel-btn" onclick="startNavWithMode('drive')">
+                    <div class="travel-icon">🚗</div>
+                    <div class="travel-label">Drive</div>
+                    <div class="travel-speed">by car</div>
+                </div>
+            </div>
+            <button class="btn-cancel" onclick="closeTravelModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- TAP-TO-PLACE OVERLAY -->
+    <div id="add-overlay">
+        <div class="add-overlay-bubble">
+            <div class="add-overlay-emoji">📍</div>
+            <div class="add-overlay-text">Tap the map to drop your bathroom pin</div>
+            <button class="add-overlay-cancel" onclick="closeModal()">✕ Cancel</button>
+        </div>
+    </div>
+
+    <!-- ADD MODAL -->
+    <div id="add-modal">
+        <div class="modal-box">
+            <h3>📍 Add a Bathroom</h3>
+            <input id="toilet-name" type="text" placeholder="Name (e.g. McDonalds)"/>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveToilet()">Save ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RATING MODAL -->
+    <div id="rating-modal">
+        <div class="modal-box">
+            <h3>⭐ Rate This Toilet</h3>
+            <div class="manual-stars">
+                <span class="star-pick" onclick="setManualStar(1)">⭐</span>
+                <span class="star-pick" onclick="setManualStar(2)">⭐</span>
+                <span class="star-pick" onclick="setManualStar(3)">⭐</span>
+                <span class="star-pick" onclick="setManualStar(4)">⭐</span>
+                <span class="star-pick" onclick="setManualStar(5)">⭐</span>
+            </div>
+            <div class="or-divider">— or pick options below —</div>
+            <div class="rating-options">
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">✅ Clean</button>
+                <button class="opt-btn negative" data-val="-1" onclick="toggleOpt(this)">❌ Not Clean</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">🧻 Has Paper</button>
+                <button class="opt-btn negative" data-val="-1" onclick="toggleOpt(this)">🚫 No Paper</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">🧼 Has Soap</button>
+                <button class="opt-btn negative" data-val="-1" onclick="toggleOpt(this)">💀 Smells Bad</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">♿ Accessible</button>
+                <button class="opt-btn negative" data-val="-1" onclick="toggleOpt(this)">🗑️ Dirty</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">🚿 Has Shower</button>
+                <button class="opt-btn negative" data-val="-1" onclick="toggleOpt(this)">🔒 Needs Key</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">💡 Well Lit</button>
+                <button class="opt-btn negative" data-val="-1" onclick="toggleOpt(this)">💸 Costs Money</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">🆓 Free</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">🏠 Indoor</button>
+                <button class="opt-btn positive" data-val="1"  onclick="toggleOpt(this)">🌳 Outdoor</button>
+            </div>
+            <div class="star-preview" id="star-preview">⭐⭐⭐⭐⭐</div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeRatingModal()">Cancel</button>
+                <button class="btn-save" onclick="submitRating()">Submit ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SELECT -->
+    <div id="game-select">
+        <div class="game-select-inner">
+            <div class="game-select-header">
+                <button class="game-back-btn" onclick="closeGameSelect()">✕</button>
+                <div class="game-select-title">🕹️ Bathroom Games</div>
+                <div class="game-select-score">🧻 <span id="total-score">0</span></div>
+            </div>
+            <div class="game-cards">
+                <div class="game-card" onclick="launchGame('pacman')">
+                    <div class="game-card-emoji">👻</div>
+                    <div class="game-card-name">Pac-Man</div>
+                    <div class="game-card-best">Best: <span id="best-pacman">0</span> 🧻</div>
+                </div>
+                <div class="game-card" onclick="launchGame('snake')">
+                    <div class="game-card-emoji">🐍</div>
+                    <div class="game-card-name">Snake</div>
+                    <div class="game-card-best">Best: <span id="best-snake">0</span> 🧻</div>
+                </div>
+                <div class="game-card" onclick="launchGame('tetris')">
+                    <div class="game-card-emoji">🟦</div>
+                    <div class="game-card-name">Tetris</div>
+                    <div class="game-card-best">Best: <span id="best-tetris">0</span> 🧻</div>
+                </div>
+                <div class="game-card" onclick="launchGame('mario')">
+                    <div class="game-card-emoji">🍄</div>
+                    <div class="game-card-name">Mario</div>
+                    <div class="game-card-best">Best: <span id="best-mario">0</span> 🧻</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen">
+        <div class="gameboy">
+            <div class="gb-screen-wrap">
+                <div class="gb-screen-label">OH SH*T 💩</div>
+                <div class="gb-screen">
+                    <div class="gb-hud">
+                        <div id="gb-level">LVL 1</div>
+                        <div id="gb-score">🧻 0</div>
+                        <button class="gb-exit" onclick="exitGame()">✕</button>
+                    </div>
+                    <canvas id="game-canvas"></canvas>
+                </div>
+            </div>
+            <div class="gb-controls">
+                <div class="gb-dpad">
+                    <div class="dpad-row">
+                        <button class="dpad-btn" onpointerdown="gameInput('up')" onpointerup="gameInputEnd('up')">▲</button>
+                    </div>
+                    <div class="dpad-row dpad-mid">
+                        <button class="dpad-btn" onpointerdown="gameInput('left')" onpointerup="gameInputEnd('left')">◀</button>
+                        <div class="dpad-center"></div>
+                        <button class="dpad-btn" onpointerdown="gameInput('right')" onpointerup="gameInputEnd('right')">▶</button>
+                    </div>
+                    <div class="dpad-row">
+                        <button class="dpad-btn" onpointerdown="gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
+                    </div>
+                </div>
+                <div class="gb-center-btns">
+                    <button class="gb-select" onclick="gameInput('select')">SELECT</button>
+                    <button class="gb-start" onclick="gameInput('start')">START</button>
+                </div>
+                <div class="gb-ab">
+                    <button class="gb-btn gb-b" onpointerdown="gameInput('b')">B</button>
+                    <button class="gb-btn gb-a" onpointerdown="gameInput('a')">A</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="sector_2_map/toilets_data.js"></script>
+    <script src="sector_2_map/map_logic.js"></script>
+    <script src="sector_2_map/navigator_ai.js"></script>
+    <script src="sector_3_arcade/pacman.js"></script>
+    <script src="sector_3_arcade/snake.js"></script>
+    <script src="sector_3_arcade/tetris.js"></script>
+    <script src="sector_3_arcade/mario_run.js"></script>
+
+</body>
+</html>
