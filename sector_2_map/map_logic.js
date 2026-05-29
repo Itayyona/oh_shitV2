@@ -29,9 +29,9 @@ var appStarted = false;
 var loadingInterval = null;
 var currentToiletId = null;
 
-var TRAVEL_SPEEDS  = { walk:5, bike:15, drive:40 };
+var TRAVEL_SPEEDS  = { walk:5, bike:15, drive:50 };
 var TRAVEL_ICONS   = { walk:'🚶', bike:'🚴', drive:'🚗' };
-var OSRM_PROFILES  = { walk:'foot', bike:'bike', drive:'car' };
+var ORS_PROFILES   = { walk:'foot-walking', bike:'cycling-regular', drive:'driving-car' };
 
 // ── THEME ──
 function getTheme() {

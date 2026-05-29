@@ -1,4 +1,4 @@
-// ── NAVIGATOR AI — Walking-first, OSRM-powered navigator ──
+// ── NAVIGATOR AI — Walking-first, ORS-powered navigator ──
 
 var NavigatorAI = {
 
@@ -8,7 +8,7 @@ var NavigatorAI = {
     _stepIndex: 0,
     _routeLine: null,
     _interval:  null,
-    _totalDuration: 0,   // OSRM duration in seconds
+    _totalDuration: 0,   // ORS duration in seconds
     _startTime:     0,   // when navigation started
 
     // ── START ──
@@ -20,26 +20,46 @@ var NavigatorAI = {
         this._fetchRoute();
     },
 
-    // ── FETCH ROUTE FROM OSRM ──
+    // ── FETCH ROUTE FROM OpenRouteService ──
     _fetchRoute: function() {
         if (userLat === null) { alert('GPS not ready'); return; }
 
-        var profile = { walk:'foot', bike:'cycling', drive:'driving' }[this._mode] || 'foot';
+        var profile = (typeof ORS_PROFILES !== 'undefined' ? ORS_PROFILES[this._mode] : null) ||
+                      { walk:'foot-walking', bike:'cycling-regular', drive:'driving-car' }[this._mode] ||
+                      'foot-walking';
 
-        var url = 'https://router.project-osrm.org/route/v1/' + profile + '/' +
-                  userLon + ',' + userLat + ';' +
-                  this._target.lon + ',' + this._target.lat +
-                  '?steps=true&geometries=geojson&overview=full&annotations=false';
+        var url = 'https://api.openrouteservice.org/v2/directions/' + profile + '/geojson';
+        var body = JSON.stringify({
+            coordinates: [
+                [userLon, userLat],
+                [this._target.lon, this._target.lat]
+            ],
+            instructions: true,
+            preference: 'recommended'
+        });
 
         setStatus('Calculating route...', true);
 
-        fetch(url)
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImUxNTAzMmRkYjQ3ODQ2YTc5OWI4ZmFjNDQzNjUzNDRkIiwiaCI6Im11cm11cjY0In0='
+            },
+            body: body
+        })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (!data.routes || !data.routes.length) {
+                if (!data || !data.features || !data.features.length) {
                     NavigatorAI._fallback(); return;
                 }
-                NavigatorAI._onRoute(data.routes[0]);
+                var route = data.features[0];
+                if (route.properties && route.properties.summary) {
+                    route.distance = route.properties.summary.distance;
+                    route.duration = route.properties.summary.duration;
+                }
+                route.legs = [{ steps: [] }];
+                NavigatorAI._onRoute(route);
             })
             .catch(function() { NavigatorAI._fallback(); });
     },
@@ -48,7 +68,7 @@ var NavigatorAI = {
     _onRoute: function(route) {
         this._route         = route;
         this._stepIndex     = 0;
-        this._totalDuration = route.duration; // seconds — straight from OSRM, accurate
+        this._totalDuration = route.duration; // seconds — straight from ORS summary
 
         // Draw route line
         if (this._routeLine) map.removeLayer(this._routeLine);
@@ -110,36 +130,58 @@ var NavigatorAI = {
 
     // ── SMART ETA ──
     _calcETA: function(remainingDist) {
-        // All modes use pure distance math with realistic Israeli speeds
-        // This avoids OSRM's optimistic speed assumptions entirely
+        var dist = this._remainingRouteDistance();
+        if (dist === null && this._route && typeof this._route.distance === 'number') {
+            dist = this._route.distance;
+        }
+        if (dist === null) {
+            dist = remainingDist;
+        }
 
         if (this._mode === 'walk') {
-            // 5 km/h = 1.39 m/s
-            var secs = remainingDist / 1.39;
-            return this._formatDuration(Math.round(secs));
+            // 4 km/h = 1.11 m/s
+            var secs = dist / 1.11;
+            return this._formatDuration(Math.ceil(secs));
         }
 
         if (this._mode === 'bike') {
-            // 14 km/h = 3.89 m/s — city cycling with traffic lights
-            var secs = remainingDist / 3.89;
-            return this._formatDuration(Math.round(secs));
+            // 10 km/h = 2.78 m/s
+            var secs = dist / 2.78;
+            return this._formatDuration(Math.ceil(secs));
         }
 
         if (this._mode === 'drive') {
-            // Use OSRM duration if available — it knows road types
-            if (this._route && this._totalDuration > 0 && this._route.distance > 0) {
-                var fraction  = Math.min(remainingDist / this._route.distance, 1);
-                var remaining = Math.round(this._totalDuration * fraction);
-                // Apply Israel traffic multiplier
-                remaining = Math.round(remaining * this._trafficMultiplier());
-                return this._formatDuration(remaining);
-            }
-            // Fallback: 30 km/h urban average = 8.33 m/s
-            return this._formatDuration(Math.round(remainingDist / 8.33));
+            // 30 km/h = 8.33 m/s
+            var secs = dist / 8.33;
+            return this._formatDuration(Math.ceil(secs));
         }
 
         // Default fallback
-        return this._formatDuration(Math.round(remainingDist / 1.39));
+        return this._formatDuration(Math.ceil(dist / 1.11));
+    },
+
+    // ── REMAINING ROUTE DISTANCE ──
+    _remainingRouteDistance: function() {
+        if (!this._route || !this._route.geometry || !Array.isArray(this._route.geometry.coordinates)) {
+            return null;
+        }
+        var coords = this._route.geometry.coordinates;
+        var closestIndex = 0;
+        var closestDist = Infinity;
+        for (var i = 0; i < coords.length; i++) {
+            var lat = coords[i][1];
+            var lon = coords[i][0];
+            var d = haversine(userLat, userLon, lat, lon);
+            if (d < closestDist) {
+                closestDist = d;
+                closestIndex = i;
+            }
+        }
+        var total = 0;
+        for (var j = closestIndex; j < coords.length - 1; j++) {
+            total += haversine(coords[j][1], coords[j][0], coords[j+1][1], coords[j+1][0]);
+        }
+        return total;
     },
 
     // ── TRAFFIC MULTIPLIER — Israel time-of-day ──
@@ -156,8 +198,7 @@ var NavigatorAI = {
 
     // ── FORMAT DURATION from seconds ──
     _formatDuration: function(seconds) {
-        if (seconds < 30)  return '< 1 min';
-        if (seconds < 60)  return '1 min';
+        if (seconds < 60) return '1 min';
         var mins = Math.ceil(seconds / 60);
         if (mins >= 60) {
             var hrs = Math.floor(mins / 60);
@@ -267,12 +308,18 @@ var NavigatorAI = {
         document.getElementById('nav-eta').textContent       = eta;
         document.getElementById('nav-mode-icon').textContent = icon;
 
-        // Distance to next turn — the key improvement over the old version
+        // Distance to next turn, otherwise show remaining route distance
         if (stepInfo.distToTurn !== null && stepInfo.distToTurn < 5000) {
             document.getElementById('nav-dist').textContent = 'In ' + fmtDist(stepInfo.distToTurn);
         } else {
-            var total = haversine(userLat, userLon, this._target.lat, this._target.lon);
-            document.getElementById('nav-dist').textContent = fmtDist(total);
+            var remaining = this._remainingRouteDistance();
+            if (remaining === null && this._route && typeof this._route.distance === 'number') {
+                remaining = this._route.distance;
+            }
+            if (remaining === null) {
+                remaining = haversine(userLat, userLon, this._target.lat, this._target.lon);
+            }
+            document.getElementById('nav-dist').textContent = fmtDist(remaining);
         }
 
         // Pulse arrow on turns
