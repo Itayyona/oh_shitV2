@@ -38,7 +38,36 @@ var tetrisGame = {
         this.next=this.randomPiece();
         this.current=this.spawnPiece();
         this.bindInput();
+        this._setupCanvas();
+        this._bindTouch();
         this.startLoop();
+    },
+
+    _setupCanvas: function() {
+        var dpr = window.devicePixelRatio || 1;
+        var rect = this.canvas.getBoundingClientRect();
+        var w = rect.width || 280, h = rect.height || 280;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
+        this.canvas.height = Math.max(1, Math.floor(h * dpr));
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    },
+
+    _bindTouch: function() {
+        var self = this;
+        this._touchHandler = function(ev) {
+            ev.preventDefault();
+            var t = ev.touches && ev.touches[0]; if(!t) return;
+            var rect = self.canvas.getBoundingClientRect();
+            var x = t.clientX - rect.left, y = t.clientY - rect.top;
+            // Left/right thirds for move, top area rotate, bottom area drop
+            if (x < rect.width/3) window.dispatchEvent(new CustomEvent('gbinput', { detail: 'left' }));
+            else if (x > rect.width*2/3) window.dispatchEvent(new CustomEvent('gbinput', { detail: 'right' }));
+            else if (y < rect.height/2) window.dispatchEvent(new CustomEvent('gbinput', { detail: 'up' }));
+            else window.dispatchEvent(new CustomEvent('gbinput', { detail: 'b' }));
+        };
+        this.canvas.addEventListener('touchstart', this._touchHandler, { passive:false });
     },
 
     setupBoard: function() {
@@ -185,9 +214,10 @@ var tetrisGame = {
 
     clearLines: function() {
         var count=this.flashRows.length;
-        // Remove full rows
-        for(var i=0;i<this.flashRows.length;i++){
-            this.board.splice(this.flashRows[i],1);
+        // Remove full rows (highest index first to avoid reindexing issues)
+        var rows = this.flashRows.slice().sort(function(a,b){return b-a;});
+        for(var i=0;i<rows.length;i++){
+            this.board.splice(rows[i],1);
             this.board.unshift(Array(this.COLS).fill(null));
         }
         this.lines+=count;
@@ -202,6 +232,16 @@ var tetrisGame = {
 
     doGameOver: function() {
         this.over=true; this.gameRunning=false;
+        // Save final score
+        try {
+            var userName = localStorage.getItem('username') || 'anonymous';
+            var allScores = (typeof getGameScores === 'function') ? getGameScores() : JSON.parse(localStorage.getItem('arcade_scores')||'{}');
+            if (!allScores.tetris) allScores.tetris = {};
+            var prev = allScores.tetris[userName] || 0;
+            if (this.score > prev) allScores.tetris[userName] = this.score;
+            localStorage.setItem('arcade_scores', JSON.stringify(allScores));
+        } catch(e) {}
+        this.stop();
     },
 
     restart: function() {
@@ -376,6 +416,10 @@ var tetrisGame = {
         this.gameRunning=false;
         if(this._loop){clearInterval(this._loop);this._loop=null;window._gameLoop=null;}
         if(this._onInput) window.removeEventListener('gbinput',this._onInput);
+        if (this._touchHandler && this.canvas) {
+            this.canvas.removeEventListener('touchstart', this._touchHandler);
+            this._touchHandler = null;
+        }
     }
 };
 

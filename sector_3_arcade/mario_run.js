@@ -19,7 +19,45 @@ var marioGame = {
         this.toiletId=toiletId;
         this.level=1; this.score=0; this.lives=3;
         this.over=false; this.running=true; this.frame=0;
-        this.buildLevel(); this.bindInput(); this.startLoop();
+        this.buildLevel(); this.bindInput();
+        this._setupCanvas();
+        this._bindTouch();
+        this.startLoop();
+    },
+
+    _setupCanvas: function() {
+        var dpr = window.devicePixelRatio || 1;
+        var rect = this.canvas.getBoundingClientRect();
+        var w = rect.width || this.W, h = rect.height || this.H;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
+        this.canvas.height = Math.max(1, Math.floor(h * dpr));
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    },
+
+    _bindTouch: function() {
+        var self = this;
+        this._touchHandler = function(ev) {
+            ev.preventDefault();
+            var t = ev.touches && ev.touches[0]; if(!t) return;
+            var rect = self.canvas.getBoundingClientRect();
+            var x = t.clientX - rect.left, y = t.clientY - rect.top;
+            // left/right half for movement, top area for jump
+            if (x < rect.width/2) window.dispatchEvent(new CustomEvent('gbinput', { detail: 'left' }));
+            else window.dispatchEvent(new CustomEvent('gbinput', { detail: 'right' }));
+            if (y < rect.height/3) window.dispatchEvent(new CustomEvent('gbinput', { detail: 'a' }));
+        };
+        this._touchEnd = function(ev) {
+            ev.preventDefault();
+            var t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
+            var rect = self.canvas.getBoundingClientRect();
+            var x = t.clientX - rect.left;
+            if (x < rect.width/2) window.dispatchEvent(new CustomEvent('gbinputend', { detail: 'left' }));
+            else window.dispatchEvent(new CustomEvent('gbinputend', { detail: 'right' }));
+        };
+        this.canvas.addEventListener('touchstart', this._touchHandler, { passive:false });
+        this.canvas.addEventListener('touchend', this._touchEnd, { passive:false });
     },
 
     buildLevel: function() {
@@ -134,14 +172,17 @@ var marioGame = {
         if(m.x<0)m.x=0;
 
         m.onGround=false;
+        var prevY = m.y - m.vy;
         for(var i=0;i<this.platforms.length;i++){
             var p=this.platforms[i];
             if(m.x+m.w<p.x||m.x>p.x+p.w||m.y+m.h<p.y||m.y>p.y+p.h)continue;
-            var fromTop=(m.y+m.h-m.vy)<=p.y+4;
-            var fromBot=(m.y-m.vy)>=p.y+p.h-4;
-            if(m.vy>=0&&fromTop){m.y=p.y-m.h;m.vy=0;m.onGround=true;}
-            else if(m.vy<0&&fromBot){m.y=p.y+p.h;m.vy=0;}
-            else{m.x-=m.vx;}
+            var prevBottom = prevY + m.h;
+            var prevTop = prevY;
+            var fromTop = (m.vy >= 0) && (prevBottom <= p.y + 4) && (m.y + m.h >= p.y);
+            var fromBot = (m.vy < 0) && (prevTop >= p.y + p.h - 4) && (m.y <= p.y + p.h);
+            if(fromTop){ m.y = p.y - m.h; m.vy = 0; m.onGround = true; }
+            else if(fromBot){ m.y = p.y + p.h; m.vy = 0; }
+            else { m.x -= m.vx; }
         }
 
         if(m.y>this.H+20){this.loseLife();return;}
@@ -162,10 +203,11 @@ var marioGame = {
             if(en.x<0||en.x>1600)en.vx*=-1;
             if(m.invincible>0)continue;
             if(m.x+m.w>en.x&&m.x<en.x+en.w&&m.y+m.h>en.y&&m.y<en.y+en.h){
-                if(m.vy>0&&m.y+m.h<en.y+en.h*0.5){
+                var prevBottom = (m.y - m.vy) + m.h;
+                if(m.vy>0 && prevBottom <= en.y + en.h*0.5){
                     en.dead=true;en.deadTimer=0;m.vy=-6;
                     this.score+=20;updateGameHUD(this.level,this.score);
-                } else {this.loseLife();return;}
+                } else { this.loseLife(); return; }
             }
         }
 
@@ -448,7 +490,16 @@ var marioGame = {
     doGameOver: function(){
         this.over=true; this.running=false;
         this.keys={left:false,right:false};
-        clearInterval(this._loop); this._loop=null;
+        // Save final score
+        try {
+            var userName = localStorage.getItem('username') || 'anonymous';
+            var allScores = (typeof getGameScores === 'function') ? getGameScores() : JSON.parse(localStorage.getItem('arcade_scores')||'{}');
+            if (!allScores.mario) allScores.mario = {};
+            var prev = allScores.mario[userName] || 0;
+            if (this.score > prev) allScores.mario[userName] = this.score;
+            localStorage.setItem('arcade_scores', JSON.stringify(allScores));
+        } catch(e) {}
+        this.stop();
     },
 
     restart: function(){
@@ -464,6 +515,11 @@ var marioGame = {
         if(this._loop){clearInterval(this._loop);this._loop=null;window._gameLoop=null;}
         if(this._onInput)    window.removeEventListener('gbinput',    this._onInput);
         if(this._onInputEnd) window.removeEventListener('gbinputend', this._onInputEnd);
+        if (this._touchHandler && this.canvas) {
+            this.canvas.removeEventListener('touchstart', this._touchHandler);
+            this.canvas.removeEventListener('touchend', this._touchEnd);
+            this._touchHandler = null; this._touchEnd = null;
+        }
     }
 };
 

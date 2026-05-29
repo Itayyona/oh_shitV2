@@ -29,7 +29,37 @@ var snakeGame = {
         this.frame       = 0;
         this.setupLevel();
         this.bindInput();
+        this._setupCanvas();
+        this._bindTouch();
         this.startLoop();
+    },
+
+    _setupCanvas: function() {
+        var dpr = window.devicePixelRatio || 1;
+        var rect = this.canvas.getBoundingClientRect();
+        var w = rect.width || 280, h = rect.height || 280;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
+        this.canvas.height = Math.max(1, Math.floor(h * dpr));
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    },
+
+    _bindTouch: function() {
+        var self = this;
+        this._touchHandler = function(ev) {
+            ev.preventDefault();
+            var t = ev.touches && ev.touches[0]; if(!t) return;
+            var rect = self.canvas.getBoundingClientRect();
+            var x = t.clientX - rect.left, y = t.clientY - rect.top;
+            var cx = rect.width/2, cy = rect.height/2;
+            var dx = x - cx, dy = y - cy;
+            var detail = 'up';
+            if (Math.abs(dx) > Math.abs(dy)) detail = dx < 0 ? 'left' : 'right';
+            else detail = dy < 0 ? 'up' : 'down';
+            window.dispatchEvent(new CustomEvent('gbinput', { detail: detail }));
+        };
+        this.canvas.addEventListener('touchstart', this._touchHandler, { passive:false });
     },
 
     setupLevel: function() {
@@ -165,8 +195,16 @@ var snakeGame = {
         if (this.lives<=0) {
             this.gameOver    = true;
             this.gameRunning = false;
-            clearInterval(this._loop);
-            this._loop = null;
+            // Save final score
+            try {
+                var userName = localStorage.getItem('username') || 'anonymous';
+                var allScores = (typeof getGameScores === 'function') ? getGameScores() : JSON.parse(localStorage.getItem('arcade_scores')||'{}');
+                if (!allScores.snake) allScores.snake = {};
+                var prev = allScores.snake[userName] || 0;
+                if (this.score > prev) allScores.snake[userName] = this.score;
+                localStorage.setItem('arcade_scores', JSON.stringify(allScores));
+            } catch(e) {}
+            this.stop();
         } else {
             // Respawn
             var mid = Math.floor(this.COLS/2);
@@ -387,6 +425,10 @@ var snakeGame = {
         this.gameRunning = false;
         if (this._loop) { clearInterval(this._loop); this._loop=null; window._gameLoop=null; }
         if (this._onInput) window.removeEventListener('gbinput', this._onInput);
+        if (this._touchHandler && this.canvas) {
+            this.canvas.removeEventListener('touchstart', this._touchHandler);
+            this._touchHandler = null;
+        }
     }
 };
 

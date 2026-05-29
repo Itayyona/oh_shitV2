@@ -86,7 +86,37 @@ var pacmanGame = {
         this.frame    = 0;
         this.setup();
         this.bindInput();
+        this._setupCanvas();
+        this._bindTouch();
         this.startLoop();
+    },
+
+    _setupCanvas: function() {
+        var dpr = window.devicePixelRatio || 1;
+        var rect = this.canvas.getBoundingClientRect();
+        var w = rect.width || 280, h = rect.height || 280;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
+        this.canvas.height = Math.max(1, Math.floor(h * dpr));
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    },
+
+    _bindTouch: function() {
+        var self = this;
+        this._touchHandler = function(ev) {
+            ev.preventDefault();
+            var t = ev.touches && ev.touches[0]; if(!t) return;
+            var rect = self.canvas.getBoundingClientRect();
+            var x = t.clientX - rect.left, y = t.clientY - rect.top;
+            var cx = rect.width/2, cy = rect.height/2;
+            var dx = x - cx, dy = y - cy;
+            var detail = 'up';
+            if (Math.abs(dx) > Math.abs(dy)) detail = dx < 0 ? 'left' : 'right';
+            else detail = dy < 0 ? 'up' : 'down';
+            window.dispatchEvent(new CustomEvent('gbinput', { detail: detail }));
+        };
+        this.canvas.addEventListener('touchstart', this._touchHandler, { passive:false });
     },
 
     setup: function() {
@@ -215,10 +245,13 @@ var pacmanGame = {
         // Move ghosts
         for (var i=0; i<this.ghosts.length; i++) this.moveGhost(this.ghosts[i]);
 
-        // Ghost collision
+        // Ghost collision (tightened threshold to reduce false positives)
         for (var g=0; g<this.ghosts.length; g++) {
             var gh = this.ghosts[g];
-            if (Math.abs(gh.px-this.px) < C*0.75 && Math.abs(gh.py-this.py) < C*0.75) {
+            var dx = gh.px - this.px, dy = gh.py - this.py;
+            var distSq = dx*dx + dy*dy;
+            var thresh = (C*0.6)*(C*0.6);
+            if (distSq < thresh) {
                 if (this.scared) {
                     gh.gx=gh.hgx; gh.gy=gh.hgy;
                     gh.px=gh.hgx*C; gh.py=gh.hgy*C;
@@ -294,7 +327,20 @@ var pacmanGame = {
 
     loseLife: function() {
         this.lives--;
-        if (this.lives<=0) { this.over=true; return; }
+        if (this.lives<=0) {
+            this.over = true;
+            // Save final score
+            try {
+                var userName = localStorage.getItem('username') || 'anonymous';
+                var allScores = (typeof getGameScores === 'function') ? getGameScores() : JSON.parse(localStorage.getItem('arcade_scores')||'{}');
+                if (!allScores.pacman) allScores.pacman = {};
+                var prev = allScores.pacman[userName] || 0;
+                if (this.score > prev) allScores.pacman[userName] = this.score;
+                localStorage.setItem('arcade_scores', JSON.stringify(allScores));
+            } catch(e) {}
+            this.stop();
+            return;
+        }
         var C=this.C;
         this.pgx=1; this.pgy=1; this.px=C; this.py=C;
         this.pdx=0; this.pdy=0; this.ndx=1; this.ndy=0;
@@ -448,6 +494,10 @@ var pacmanGame = {
         this.running=false;
         if (this._loop) { clearInterval(this._loop); this._loop=null; window._gameLoop=null; }
         if (this._input) window.removeEventListener('gbinput',this._input);
+        if (this._touchHandler && this.canvas) {
+            this.canvas.removeEventListener('touchstart', this._touchHandler);
+            this._touchHandler = null;
+        }
     }
 };
 
