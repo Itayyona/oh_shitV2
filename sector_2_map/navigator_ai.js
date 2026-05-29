@@ -128,36 +128,28 @@ var NavigatorAI = {
         this._updatePanel(stepInfo, eta);
     },
 
-    // ── SMART ETA ──
+    // ── SMART ETA — use ORS summary.duration with 15% buffer ──
     _calcETA: function(remainingDist) {
-        var dist = this._remainingRouteDistance();
-        if (dist === null && this._route && typeof this._route.distance === 'number') {
-            dist = this._route.distance;
-        }
-        if (dist === null) {
-            dist = remainingDist;
-        }
-
-        if (this._mode === 'walk') {
-            // 4 km/h = 1.11 m/s
-            var secs = dist / 1.11;
-            return this._formatDuration(Math.ceil(secs));
+        // Prefer ORS-provided route duration (in seconds) and scale it
+        if (this._route && typeof this._route.distance === 'number' && this._totalDuration > 0) {
+            var remainingRouteDist = this._remainingRouteDistance();
+            if (remainingRouteDist === null) remainingRouteDist = this._route.distance;
+            var fraction = Math.min(Math.max(remainingRouteDist / this._route.distance, 0), 1);
+            var remainingSecs = Math.ceil(this._totalDuration * fraction);
+            // Add conservative 15% buffer for unexpected delays and always round up
+            remainingSecs = Math.ceil(remainingSecs * 1.15);
+            return this._formatDuration(remainingSecs);
         }
 
-        if (this._mode === 'bike') {
-            // 10 km/h = 2.78 m/s
-            var secs = dist / 2.78;
-            return this._formatDuration(Math.ceil(secs));
-        }
-
-        if (this._mode === 'drive') {
-            // 30 km/h = 8.33 m/s
-            var secs = dist / 8.33;
-            return this._formatDuration(Math.ceil(secs));
-        }
-
-        // Default fallback
-        return this._formatDuration(Math.ceil(dist / 1.11));
+        // Fallback: use straight-line distance with a conservative speed and 15% buffer
+        var dist = remainingDist;
+        if (dist === null || typeof dist !== 'number') return this._formatDuration(60);
+        var speedMs = 1.11; // default 4 km/h
+        if (this._mode === 'bike') speedMs = 2.78; // 10 km/h
+        if (this._mode === 'drive') speedMs = 8.33; // 30 km/h
+        var secs = dist / speedMs;
+        secs = Math.ceil(secs * 1.15);
+        return this._formatDuration(secs);
     },
 
     // ── REMAINING ROUTE DISTANCE ──
