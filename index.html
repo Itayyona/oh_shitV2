@@ -276,7 +276,7 @@
                     <div class="gb-hud">
                         <div id="gb-level">LVL 1</div>
                         <div id="gb-score">🧻 0</div>
-                        <button class="gb-exit" onclick="exitGame()">✕</button>
+                        <button class="gb-exit" ontouchstart="event.preventDefault()" onclick="exitGame()">✕</button>
                     </div>
                     <canvas id="game-canvas"></canvas>
                 </div>
@@ -284,24 +284,24 @@
             <div class="gb-controls">
                 <div class="gb-dpad">
                     <div class="dpad-row">
-                        <button class="dpad-btn" onpointerdown="gameInput('up')" onpointerup="gameInputEnd('up')">▲</button>
+                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('up')" onpointerup="gameInputEnd('up')">▲</button>
                     </div>
                     <div class="dpad-row dpad-mid">
-                        <button class="dpad-btn" onpointerdown="gameInput('left')" onpointerup="gameInputEnd('left')">◀</button>
+                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('left')" onpointerup="gameInputEnd('left')">◀</button>
                         <div class="dpad-center"></div>
-                        <button class="dpad-btn" onpointerdown="gameInput('right')" onpointerup="gameInputEnd('right')">▶</button>
+                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('right')" onpointerup="gameInputEnd('right')">▶</button>
                     </div>
                     <div class="dpad-row">
-                        <button class="dpad-btn" onpointerdown="gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
+                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
                     </div>
                 </div>
                 <div class="gb-center-btns">
-                    <button class="gb-select" onclick="gameInput('select')">SELECT</button>
-                    <button class="gb-start" onclick="gameInput('start')">START</button>
+                    <button class="gb-select" ontouchstart="event.preventDefault()" onclick="gameInput('select')">SELECT</button>
+                    <button class="gb-start" ontouchstart="event.preventDefault()" onclick="gameInput('start')">START</button>
                 </div>
                 <div class="gb-ab">
-                    <button class="gb-btn gb-b" onpointerdown="gameInput('b')">B</button>
-                    <button class="gb-btn gb-a" onpointerdown="gameInput('a')">A</button>
+                    <button class="gb-btn gb-b" ontouchstart="event.preventDefault()" onpointerdown="gameInput('b')">B</button>
+                    <button class="gb-btn gb-a" ontouchstart="event.preventDefault()" onpointerdown="gameInput('a')">A</button>
                 </div>
             </div>
         </div>
