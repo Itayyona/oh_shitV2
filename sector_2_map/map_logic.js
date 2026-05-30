@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var exitBtn = document.querySelector('.gb-exit');
     if (exitBtn) {
-        exitBtn.addEventListener('touchend', function(e) {
+        exitBtn.addEventListener('touchstart', function(e) {
             e.preventDefault();
             e.stopPropagation();
             exitGame();
