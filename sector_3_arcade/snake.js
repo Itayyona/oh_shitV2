@@ -20,9 +20,6 @@ function stopSnake() {
 }
 
 function startSnake(canvas, toiletId) {
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     stopSnake();
     var w = window.innerWidth;
     var h = Math.floor(window.innerHeight * 0.58);
@@ -258,16 +255,19 @@ function startSnake(canvas, toiletId) {
 
         ctx.clearRect(0, 0, width, height);
 
-        ctx.fillStyle = '#d7f1ff';
+        // Water background
+        ctx.fillStyle = '#87CEEB';
         drawRoundedRect(ctx, ring, ring, width - ring * 2, height - ring * 2, radius);
         ctx.fill();
 
-        ctx.strokeStyle = '#f8f9fb';
-        ctx.lineWidth = ring * 0.35;
-        drawRoundedRect(ctx, ring, ring, width - ring * 2, height - ring * 2, radius);
+        // Porcelain outer ring
+        ctx.strokeStyle = '#f0f0f0';
+        ctx.lineWidth = Math.max(6, ring * 0.6);
+        drawRoundedRect(ctx, ring / 2, ring / 2, width - ring, height - ring, radius + 4);
         ctx.stroke();
 
-        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        // Subtle grid lines inside water
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
         ctx.lineWidth = Math.max(1, ring * 0.03);
         for (var line = offsetY; line <= offsetY + snakeState.rows * cell; line += cell) {
             ctx.beginPath();
@@ -282,75 +282,64 @@ function startSnake(canvas, toiletId) {
             ctx.stroke();
         }
 
+        // Food: white roll with brown core
         if (snakeState.food) {
             var foodX = offsetX + snakeState.food.x * cell + cell / 2;
             var foodY = offsetY + snakeState.food.y * cell + cell / 2;
-            var foodRadius = cell * 0.32;
+            var outerR = cell * 0.35;
             ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(foodX - foodRadius * 0.4, foodY, foodRadius, Math.PI * 0.5, Math.PI * 1.5);
-            ctx.arc(foodX + foodRadius * 0.4, foodY, foodRadius, Math.PI * 1.5, Math.PI * 0.5);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = '#e3e3e3';
-            ctx.beginPath();
-            ctx.arc(foodX - foodRadius * 0.4, foodY - foodRadius * 0.65, foodRadius * 0.32, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(foodX + foodRadius * 0.4, foodY - foodRadius * 0.65, foodRadius * 0.32, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = '#c8c8c8';
-            ctx.lineWidth = Math.max(1, foodRadius * 0.12);
-            ctx.beginPath();
-            ctx.moveTo(foodX - foodRadius * 0.7, foodY);
-            ctx.lineTo(foodX + foodRadius * 0.7, foodY);
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(foodX, foodY, outerR, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#b57a46';
+            ctx.beginPath(); ctx.arc(foodX, foodY, outerR * 0.38, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = Math.max(1, outerR * 0.08);
+            ctx.beginPath(); ctx.arc(foodX, foodY, outerR - ctx.lineWidth, 0, Math.PI * 2); ctx.stroke();
         }
 
+        // Snake body and head
         for (var i = snakeState.snake.length - 1; i >= 0; i--) {
             var segment = snakeState.snake[i];
             var segX = offsetX + segment.x * cell;
             var segY = offsetY + segment.y * cell;
             var pad = cell * 0.12;
             var size = cell - pad * 2;
-            var color = i === 0 ? '#6b3f20' : (i % 2 ? '#7e4722' : '#a15a31');
-
-            ctx.fillStyle = color;
-            drawRoundedRect(ctx, segX + pad, segY + pad, size, size, size * 0.25);
-            ctx.fill();
+            var color = '#6b3a2a';
 
             if (i === 0) {
-                var eyeRadius = cell * 0.06;
+                // Head as circle
+                var cx = segX + cell / 2;
+                var cy = segY + cell / 2;
+                var r = size * 0.5;
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+                // Eyes
+                var eyeR = Math.max(1, cell * 0.06);
                 ctx.fillStyle = '#ffffff';
-                ctx.beginPath(); ctx.arc(segX + cell * 0.28, segY + cell * 0.30, eyeRadius, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(segX + cell * 0.72, segY + cell * 0.30, eyeRadius, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx - cell * 0.18, cy - cell * 0.18, eyeR, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx + cell * 0.18, cy - cell * 0.18, eyeR, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = '#202020';
-                ctx.beginPath(); ctx.arc(segX + cell * 0.28, segY + cell * 0.30, eyeRadius * 0.45, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(segX + cell * 0.72, segY + cell * 0.30, eyeRadius * 0.45, 0, Math.PI * 2); ctx.fill();
-
-                ctx.strokeStyle = '#d65a4a';
-                ctx.lineWidth = Math.max(1, cell * 0.04);
-                ctx.beginPath();
-                ctx.moveTo(segX + cell * 0.5, segY + cell * 0.5);
-                ctx.lineTo(segX + cell * 0.5, segY + cell * 0.75);
-                ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx - cell * 0.18, cy - cell * 0.18, eyeR * 0.45, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx + cell * 0.18, cy - cell * 0.18, eyeR * 0.45, 0, Math.PI * 2); ctx.fill();
+            } else {
+                // Body segment as rounded square
+                ctx.fillStyle = color;
+                drawRoundedRect(ctx, segX + pad, segY + pad, size, size, size * 0.18);
+                ctx.fill();
             }
         }
 
+        // Game over overlay
         if (snakeState.gameOver) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.fillRect(0, 0, width, height);
             ctx.fillStyle = '#ffffff';
-            var titleSize = Math.max(18, Math.round(height * 0.06));
-            ctx.font = 'bold ' + titleSize + 'px Nunito, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            var titleSize = Math.max(18, Math.round(height * 0.06));
+            ctx.font = 'bold ' + titleSize + 'px Nunito, sans-serif';
             ctx.fillText('GAME OVER', width / 2, height * 0.36);
             ctx.font = Math.max(14, Math.round(height * 0.035)) + 'px Nunito, sans-serif';
-            ctx.fillText('Score: ' + snakeState.score, width / 2, height * 0.48);
-            ctx.fillText('Best: ' + snakeState.bestScore, width / 2, height * 0.54);
+            ctx.fillText('🧻 ' + snakeState.score, width / 2, height * 0.48);
+            ctx.fillText('Best: 🧻 ' + snakeState.bestScore, width / 2, height * 0.54);
             ctx.font = Math.max(12, Math.round(height * 0.03)) + 'px Nunito, sans-serif';
             ctx.fillText('Tap to play again', width / 2, height * 0.64);
         }
