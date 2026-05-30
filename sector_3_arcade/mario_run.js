@@ -380,16 +380,6 @@ var marioGame = {
         var blink=m.invincible>0&&Math.floor(m.invincible/5)%2===0;
         if(!blink)this.drawMario(ctx,mx+m.w/2,m.y+m.h,m.facing,m.frame,m.onGround);
 
-        // HUD bar
-        ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,16);
-        ctx.fillStyle='#ffe600'; ctx.font='bold 10px Nunito'; ctx.textAlign='left';
-        ctx.fillText('LVL '+this.level,4,11);
-        ctx.fillStyle='#ff6b6b'; ctx.textAlign='center';
-        var hearts=''; for(var h=0;h<this.lives;h++)hearts+='❤️';
-        ctx.fillText(hearts,140,11);
-        ctx.fillStyle='#fff'; ctx.textAlign='right';
-        ctx.fillText('🧻 '+this.score,W-4,11);
-
         // Banner
         if(this.banner&&this.banner.timer>0){
             ctx.fillStyle='rgba(0,0,0,0.75)'; ctx.fillRect(0,105,W,65);

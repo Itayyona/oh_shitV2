@@ -350,7 +350,7 @@ body.day   .game-card-name { color:#111; }
     padding:0;
     box-shadow:0 0 0 3px #4a5535, inset 0 1px 0 rgba(255,255,255,0.15);
     display:grid;
-    grid-template-rows:55% 45%;
+    grid-template-rows:55vh 45vh;
     overflow:hidden;
     touch-action:none;
 }
@@ -358,13 +358,14 @@ body.day   .game-card-name { color:#111; }
 /* ── SCREEN AREA ── */
 .gb-screen-wrap {
     background:#3d4a2e;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-start;
-    padding:4vw;
+    display:grid;
+    grid-template-rows:auto auto 1fr;
+    padding:3vw 3vw 2vw;
+    gap:1.5vh;
     box-shadow:inset 0 2px 8px rgba(0,0,0,0.5);
-    min-height:0;
-    height:100%;
+    min-height:55vh;
+    height:55vh;
+    box-sizing:border-box;
 }
 .gb-screen-label {
     text-align:center;
@@ -372,7 +373,7 @@ body.day   .game-card-name { color:#111; }
     font-weight:900;
     color:#8b956d;
     letter-spacing:3px;
-    margin-bottom:3vw;
+    margin-bottom:0;
     opacity:0.8;
 }
 .gb-screen {
@@ -383,7 +384,6 @@ body.day   .game-card-name { color:#111; }
     box-shadow:inset 0 0 20px rgba(0,0,0,0.3);
     display:flex;
     flex-direction:column;
-    flex:1;
     min-height:0;
 }
 .gb-hud {
@@ -393,6 +393,7 @@ body.day   .game-card-name { color:#111; }
     padding:3vw 4vw;
     background:rgba(0,0,0,0.2);
     min-height:6vh;
+    box-sizing:border-box;
 }
 #gb-level { font-size:clamp(10px, 2.4vw, 16px); font-weight:900; color:#0f380f; letter-spacing:1px; }
 #gb-score { font-size:clamp(10px, 2.4vw, 16px); font-weight:900; color:#0f380f; }
@@ -415,7 +416,7 @@ body.day   .game-card-name { color:#111; }
 #game-canvas {
     display:block;
     width:100%;
-    flex:1;
+    height:100%;
     min-height:0;
     image-rendering:pixelated;
 }
@@ -427,8 +428,10 @@ body.day   .game-card-name { color:#111; }
     justify-content:space-between;
     padding:4vw 3vw;
     gap:3vh;
-    height:100%;
-    min-height:0;
+    height:45vh;
+    min-height:45vh;
+    max-height:45vh;
+    box-sizing:border-box;
     touch-action:manipulation;
 }
 

@@ -375,15 +375,6 @@ var snakeGame = {
             this.drawSegment(ctx, this.snake[i], i===0, i);
         }
 
-        // HUD bar
-        ctx.fillStyle = 'rgba(0,0,0,0.65)'; ctx.fillRect(0,0,W,16);
-        ctx.fillStyle = '#00ff41'; ctx.font='bold 10px Nunito'; ctx.textAlign='left';
-        ctx.fillText('LVL '+this.level, 4, 11);
-        ctx.fillStyle = '#ff6b6b'; ctx.textAlign='center';
-        ctx.fillText('❤️'.repeat(this.lives), 140, 11);
-        ctx.fillStyle = '#fff'; ctx.textAlign='right';
-        ctx.fillText('🧻 '+this.score, W-4, 11);
-
         // Next level progress
         var progress = (this.foodEaten%5);
         ctx.fillStyle = 'rgba(0,255,65,0.15)';
