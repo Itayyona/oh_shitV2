@@ -354,16 +354,20 @@ var snakeGame = {
         // Food — toilet paper with glow
         if (this.food) {
             var bounce = Math.sin(this.frame*0.12)*2;
-            var grd = ctx.createRadialGradient(
-                this.food.x*C+C/2, this.food.y*C+C/2, 1,
-                this.food.x*C+C/2, this.food.y*C+C/2, C
-            );
-            grd.addColorStop(0,'rgba(255,255,200,0.4)');
+            var centerX = this.food.x * C + C/2;
+            var centerY = this.food.y * C + C/2;
+            var foodSize = Math.max(C * 1.5, 24);
+            var halfSize = foodSize / 2;
+            var grd = ctx.createRadialGradient(centerX, centerY, 1, centerX, centerY, halfSize);
+            grd.addColorStop(0,'rgba(255,255,200,0.45)');
             grd.addColorStop(1,'rgba(255,255,200,0)');
             ctx.fillStyle = grd;
-            ctx.fillRect(this.food.x*C-C/2, this.food.y*C-C/2, C*2, C*2);
-            ctx.font = '16px serif'; ctx.textAlign = 'center';
-            ctx.fillText('🧻', this.food.x*C+C/2, this.food.y*C+C-1+bounce);
+            ctx.fillRect(centerX-halfSize, centerY-halfSize, foodSize, foodSize);
+            ctx.font = 'bold ' + Math.round(foodSize * 0.9) + 'px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('🧻', centerX, centerY + bounce);
         }
 
         // Snake — tail to head
