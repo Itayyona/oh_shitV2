@@ -461,8 +461,8 @@ function launchGame(gameType) {
     document.getElementById('game-screen').style.display = 'flex';
 
     var canvas = document.getElementById('game-canvas');
-    canvas.width  = 280;
-    canvas.height = 280;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
 
     document.getElementById('gb-level').textContent = 'LVL 1';
     document.getElementById('gb-score').textContent = '🧻 0';

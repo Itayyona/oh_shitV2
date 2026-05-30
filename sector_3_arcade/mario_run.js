@@ -30,10 +30,9 @@ var marioGame = {
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         setTimeout(function() {
-            var w = Math.max(1, self.canvas.offsetWidth);
-            var h = Math.max(1, self.canvas.offsetHeight);
-            self.canvas.width = w;
-            self.canvas.height = h;
+            var r = self.canvas.getBoundingClientRect();
+            self.canvas.width = Math.max(1, Math.floor(r.width));
+            self.canvas.height = Math.max(1, Math.floor(r.height));
             self.ctx.setTransform(1,0,0,1,0,0);
         }, 50);
     },

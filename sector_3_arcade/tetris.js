@@ -12,13 +12,13 @@ var tetrisGame = {
 
     // 💩 bathroom-themed piece colors
     PIECES:[
-        { shape:[[1,1,1,1]],           color:'#00d4ff' }, // I — toilet water blue
-        { shape:[[1,1],[1,1]],         color:'#f0e040' }, // O — yellow
-        { shape:[[0,1,0],[1,1,1]],     color:'#a855f7' }, // T — purple
-        { shape:[[0,1,1],[1,1,0]],     color:'#4ade80' }, // S — green (mold)
-        { shape:[[1,1,0],[0,1,1]],     color:'#f87171' }, // Z — red
-        { shape:[[1,0,0],[1,1,1]],     color:'#60a5fa' }, // J — blue
-        { shape:[[0,0,1],[1,1,1]],     color:'#fb923c' }, // L — orange (rust)
+        { shape:[[1,1,1,1]],           color:'#6dd3ff' }, // I — toilet water blue
+        { shape:[[1,1],[1,1]],         color:'#f7d86f' }, // O — pale porcelain
+        { shape:[[0,1,0],[1,1,1]],     color:'#c78bff' }, // T — tile purple
+        { shape:[[0,1,1],[1,1,0]],     color:'#7cd680' }, // S — mold green
+        { shape:[[1,1,0],[0,1,1]],     color:'#fb7f7f' }, // Z — flushed red
+        { shape:[[1,0,0],[1,1,1]],     color:'#84baff' }, // J — bathroom blue
+        { shape:[[0,0,1],[1,1,1]],     color:'#faae70' }, // L — rust orange
     ],
 
     rng: null,
@@ -48,10 +48,9 @@ var tetrisGame = {
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         setTimeout(function() {
-            var w = Math.max(1, self.canvas.offsetWidth);
-            var h = Math.max(1, self.canvas.offsetHeight);
-            self.canvas.width = w;
-            self.canvas.height = h;
+            var r = self.canvas.getBoundingClientRect();
+            self.canvas.width = Math.max(1, Math.floor(r.width));
+            self.canvas.height = Math.max(1, Math.floor(r.height));
             self.ctx.setTransform(1,0,0,1,0,0);
         }, 50);
     },
@@ -264,11 +263,14 @@ var tetrisGame = {
         var boardX=4; // left side
         var previewX=boardX+boardW+8; // right side preview panel
 
-        // Background
-        ctx.fillStyle='#0d0d1a'; ctx.fillRect(0,0,W,H);
+        // Background — dark bathroom tile pattern
+        ctx.fillStyle='#11171f'; ctx.fillRect(0,0,W,H);
+        ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1;
+        for (var tx=0; tx<W; tx+=20) { ctx.beginPath(); ctx.moveTo(tx,0); ctx.lineTo(tx,H); ctx.stroke(); }
+        for (var ty=0; ty<H; ty+=20) { ctx.beginPath(); ctx.moveTo(0,ty); ctx.lineTo(W,ty); ctx.stroke(); }
 
         // Board background
-        ctx.fillStyle='#1a1a2e'; ctx.fillRect(boardX,0,boardW,H);
+        ctx.fillStyle='#181f2e'; ctx.fillRect(boardX,0,boardW,H);
 
         // Grid lines
         ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=0.5;

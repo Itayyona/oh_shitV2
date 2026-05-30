@@ -270,38 +270,33 @@
     <!-- GAME SCREEN -->
     <div id="game-screen" ontouchstart="event.preventDefault()" ontouchend="event.preventDefault()">
         <div class="gameboy">
-            <div class="gb-screen-wrap">
-                <div class="gb-screen-label">OH SH*T 💩</div>
-                <div class="gb-hud">
-                    <div id="gb-level">LVL 1</div>
-                    <div id="gb-score">🧻 0</div>
-                    <button class="gb-exit" type="button" ontouchstart="event.preventDefault()" onclick="exitGame()">✕</button>
-                </div>
-                <div class="gb-screen">
-                    <canvas id="game-canvas"></canvas>
-                </div>
+            <div class="gb-top-bar">OH SH*T 💩</div>
+            <div class="gb-hud">
+                <div id="gb-level">LVL 1</div>
+                <div id="gb-score">🧻 0</div>
+                <button id="exit-btn" type="button" onclick="exitGame()">✕</button>
+            </div>
+            <div class="gb-screen">
+                <canvas id="game-canvas"></canvas>
             </div>
             <div class="gb-controls">
                 <div class="gb-dpad">
                     <div class="dpad-row">
                         <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('up')" onpointerup="gameInputEnd('up')">▲</button>
                     </div>
-                    <div class="dpad-row dpad-mid">
+                    <div class="dpad-row">
                         <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('left')" onpointerup="gameInputEnd('left')">◀</button>
-                        <div class="dpad-center"></div>
+                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
                         <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('right')" onpointerup="gameInputEnd('right')">▶</button>
                     </div>
-                    <div class="dpad-row">
-                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
-                    </div>
                 </div>
-                <div class="gb-center-btns">
-                    <button class="gb-select" ontouchstart="event.preventDefault()" onclick="gameInput('select')">SELECT</button>
-                    <button class="gb-start" ontouchstart="event.preventDefault()" onclick="gameInput('start')">START</button>
+                <div class="gb-center">
+                    <button class="gb-center-btn" ontouchstart="event.preventDefault()" onclick="gameInput('select')">SELECT</button>
+                    <button class="gb-center-btn" ontouchstart="event.preventDefault()" onclick="gameInput('start')">START</button>
                 </div>
-                <div class="gb-ab">
-                    <button class="gb-btn gb-b" ontouchstart="event.preventDefault()" onpointerdown="gameInput('b')">B</button>
-                    <button class="gb-btn gb-a" ontouchstart="event.preventDefault()" onpointerdown="gameInput('a')">A</button>
+                <div class="gb-action">
+                    <button class="gb-action-btn gb-b" ontouchstart="event.preventDefault()" onpointerdown="gameInput('b')">B</button>
+                    <button class="gb-action-btn gb-a" ontouchstart="event.preventDefault()" onpointerdown="gameInput('a')">A</button>
                 </div>
             </div>
         </div>
