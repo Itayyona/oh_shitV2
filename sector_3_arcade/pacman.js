@@ -92,15 +92,16 @@ var pacmanGame = {
     },
 
     _setupCanvas: function() {
-        var dpr = window.devicePixelRatio || 1;
+        var self = this;
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
-        var rect = this.canvas.getBoundingClientRect();
-        var w = Math.max(1, rect.width);
-        var h = Math.max(1, rect.height);
-        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
-        this.canvas.height = Math.max(1, Math.floor(h * dpr));
-        this.ctx.setTransform(dpr,0,0,dpr,0,0);
+        setTimeout(function() {
+            var w = Math.max(1, self.canvas.offsetWidth);
+            var h = Math.max(1, self.canvas.offsetHeight);
+            self.canvas.width = w;
+            self.canvas.height = h;
+            self.ctx.setTransform(1,0,0,1,0,0);
+        }, 50);
     },
 
     _bindTouch: function() {
