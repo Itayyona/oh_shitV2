@@ -243,7 +243,11 @@
                 <div class="game-select-score">🧻 <span id="total-score">0</span></div>
             </div>
             <div class="game-cards">
-                <div class="games-coming-soon">🎮 Games Coming Soon</div>
+                <div class="game-card" onclick="launchGame('snake')">
+                    <div class="game-card-emoji">🐍</div>
+                    <div class="game-card-name">Snake</div>
+                    <div class="game-card-best">Best: <span id="best-snake">0</span> 🧻</div>
+                </div>
             </div>
         </div>
     </div>
@@ -280,6 +284,7 @@
     <script src="sector_2_map/map_logic.js"></script>
     <script src="sector_2_map/navigator_ai.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script src="sector_3_arcade/snake.js"></script>
     <!-- Arcade scripts removed while games are unavailable -->
 
 </body>
