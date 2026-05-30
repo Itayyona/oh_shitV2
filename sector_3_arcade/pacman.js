@@ -454,13 +454,6 @@ var pacmanGame = {
 
         this.drawPlayer(ctx,this.px,this.py,this.pdx,this.pdy,this.pframe);
 
-        ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,W,16);
-        ctx.fillStyle='#ffff00'; ctx.font='bold 10px Nunito'; ctx.textAlign='left';
-        ctx.fillText('LVL '+this.level,4,11);
-        ctx.fillStyle='#ff6b6b'; ctx.textAlign='center';
-        ctx.fillText('❤️'.repeat(this.lives),140,11);
-        ctx.fillStyle='#fff'; ctx.textAlign='right';
-        ctx.fillText('🧻 '+this.score,W-4,11);
         ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.font='8px Nunito'; ctx.textAlign='center';
         ctx.fillText((this.total-this.eaten)+' left',140,275);
 

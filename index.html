@@ -272,12 +272,12 @@
         <div class="gameboy">
             <div class="gb-screen-wrap">
                 <div class="gb-screen-label">OH SH*T 💩</div>
+                <div class="gb-hud">
+                    <div id="gb-level">LVL 1</div>
+                    <div id="gb-score">🧻 0</div>
+                    <button class="gb-exit" ontouchstart="event.preventDefault()" onclick="exitGame()">✕</button>
+                </div>
                 <div class="gb-screen">
-                    <div class="gb-hud">
-                        <div id="gb-level">LVL 1</div>
-                        <div id="gb-score">🧻 0</div>
-                        <button class="gb-exit" ontouchstart="event.preventDefault()" onclick="exitGame()">✕</button>
-                    </div>
                     <canvas id="game-canvas"></canvas>
                 </div>
             </div>

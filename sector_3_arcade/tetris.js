@@ -386,13 +386,6 @@ var tetrisGame = {
         ctx.fillText('B=drop',previewX+44,H-26);
         ctx.fillText('🧻 '+this.score,previewX+44,H-14);
 
-        // HUD bar at top
-        ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,0,W,15);
-        ctx.fillStyle='#ffe600'; ctx.font='bold 9px Nunito'; ctx.textAlign='left';
-        ctx.fillText('LVL '+this.level,4,10);
-        ctx.fillStyle='#fff'; ctx.textAlign='right';
-        ctx.fillText('🧻 '+this.score,W-4,10);
-
         // Game over overlay
         if(this.over){
             ctx.fillStyle='rgba(0,0,0,0.88)'; ctx.fillRect(0,0,W,H);
