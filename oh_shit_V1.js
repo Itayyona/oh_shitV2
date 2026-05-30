@@ -162,5 +162,3 @@ var tetrisGame = {
     gameOver: function() { this.gameRunning = false; },
     stop: function() { this.gameRunning = false; clearInterval(window._gameLoop); window.removeEventListener('gbinput', this._onInput); }
 };
-
-function startTetris(canvas, id) { tetrisGame.init(canvas, id); }

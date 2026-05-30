@@ -442,21 +442,7 @@ function navigateFromPopup(id) {
 function openGameSelect(toiletId) {
     currentToiletId = toiletId;
     map.closePopup();
-
-    // Update best scores on cards
-    var games = ['pacman','snake','tetris','mario'];
-    var userName = localStorage.getItem('username') || 'anonymous';
-    var allScores = getGameScores();
-    var total = 0;
-
-    games.forEach(function(g) {
-        var best = (allScores[g] && allScores[g][userName]) ? allScores[g][userName] : 0;
-        var el = document.getElementById('best-' + g);
-        if (el) el.textContent = best;
-        total += best;
-    });
-
-    document.getElementById('total-score').textContent = total;
+    document.getElementById('total-score').textContent = 0;
     document.getElementById('game-select').style.display = 'flex';
 }
 
@@ -475,10 +461,10 @@ function launchGame(gameType) {
         var rect = canvas.getBoundingClientRect();
         canvas.width = rect.width;
         canvas.height = rect.height;
-        if (gameType === 'pacman')  startPacman(canvas, currentToiletId);
-        if (gameType === 'snake')   startSnake(canvas, currentToiletId);
-        if (gameType === 'tetris')  startTetris(canvas, currentToiletId);
-        if (gameType === 'mario')   startMario(canvas, currentToiletId);
+        if (gameType === 'pacman' && typeof startPacman === 'function')  startPacman(canvas, currentToiletId);
+        if (gameType === 'snake' && typeof startSnake === 'function')   startSnake(canvas, currentToiletId);
+        if (gameType === 'tetris' && typeof startTetris === 'function')  startTetris(canvas, currentToiletId);
+        if (gameType === 'mario' && typeof startMario === 'function')   startMario(canvas, currentToiletId);
     }, 300);
 }
 
