@@ -401,10 +401,12 @@ body.day   .game-card-name { color:#111; }
     background:rgba(0,0,0,0.2);
     border:none;
     color:#0f380f;
-    width:clamp(32px, 8vw, 44px);
-    height:clamp(32px, 8vw, 44px);
+    min-width:60px;
+    min-height:60px;
+    width:clamp(60px, 12vw, 72px);
+    height:clamp(60px, 12vw, 72px);
     border-radius:50%;
-    font-size:clamp(12px, 3vw, 18px);
+    font-size:clamp(14px, 3vw, 20px);
     cursor:pointer;
     font-weight:900;
     line-height:1;
