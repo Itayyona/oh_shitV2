@@ -463,6 +463,7 @@ function launchGame(gameType) {
     var canvas = document.getElementById('game-canvas');
     canvas.style.width = '100%';
     canvas.style.height = '100%';
+    canvas.getBoundingClientRect();
 
     document.getElementById('gb-level').textContent = 'LVL 1';
     document.getElementById('gb-score').textContent = '🧻 0';

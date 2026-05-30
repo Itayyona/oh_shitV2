@@ -404,8 +404,8 @@ body.day   .game-card-name { color:#111; }
     transform:translateY(1px);
 }
 .gb-screen {
-    flex:1 1 0;
     width:100%;
+    height:45vh;
     background:#000000;
     border-radius:18px;
     overflow:hidden;
