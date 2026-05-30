@@ -20,9 +20,16 @@ function stopSnake() {
 }
 
 function startSnake(canvas, toiletId) {
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     stopSnake();
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    var w = window.innerWidth;
+    var h = Math.floor(window.innerHeight * 0.58);
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
 
     var ctx = canvas.getContext('2d');
     var cols = 20;
