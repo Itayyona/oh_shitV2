@@ -39,7 +39,8 @@ var snakeGame = {
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         var rect = this.canvas.getBoundingClientRect();
-        var w = rect.width || 280, h = rect.height || 280;
+        var w = Math.max(1, rect.width);
+        var h = Math.max(1, rect.height);
         this.canvas.width  = Math.max(1, Math.floor(w * dpr));
         this.canvas.height = Math.max(1, Math.floor(h * dpr));
         this.ctx.setTransform(dpr,0,0,dpr,0,0);
