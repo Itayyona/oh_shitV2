@@ -35,15 +35,14 @@ var snakeGame = {
     },
 
     _setupCanvas: function() {
-        var self = this;
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-        setTimeout(function() {
-            var r = self.canvas.getBoundingClientRect();
-            self.canvas.width = Math.max(1, Math.floor(r.width));
-            self.canvas.height = Math.max(1, Math.floor(r.height));
-            self.ctx.setTransform(1,0,0,1,0,0);
-        }, 50);
+        var dpr = window.devicePixelRatio || 1;
+        var rect = this.canvas.getBoundingClientRect();
+        var w = rect.width || 280, h = rect.height || 280;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
+        this.canvas.height = Math.max(1, Math.floor(h * dpr));
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
     },
 
     _bindTouch: function() {
@@ -232,21 +231,12 @@ var snakeGame = {
     // ── DRAW SNAKE SEGMENT ──
     drawSegment: function(ctx, seg, isHead, idx) {
         var C   = this.CELL;
-        var x   = seg.x * C + C/2;
-        var y   = seg.y * C + C/2;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#6b4226';
-        if (isHead) {
-            ctx.font = 'bold 28px serif';
-            ctx.fillText('💩', x, y - 2);
-            ctx.fillStyle = '#fff';
-            ctx.beginPath(); ctx.arc(x-5, y-6, 2, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(x+5, y-6, 2, 0, Math.PI*2); ctx.fill();
-        } else {
-            ctx.font = '24px serif';
-            ctx.fillText('💩', x, y);
-        }
+        var px  = seg.x * C;
+        var py  = seg.y * C;
+        var pad = 2;
+
+        // Poo-brown colors
+        ctx.fillStyle = isHead ? '#5c3317' : (idx%2===0 ? '#7a4520' : '#8a5528');
         ctx.beginPath();
         if (ctx.roundRect) ctx.roundRect(px+pad, py+pad, C-pad*2, C-pad*2, 5);
         else ctx.rect(px+pad, py+pad, C-pad*2, C-pad*2);
@@ -384,6 +374,15 @@ var snakeGame = {
         for (var i=this.snake.length-1; i>=0; i--) {
             this.drawSegment(ctx, this.snake[i], i===0, i);
         }
+
+        // HUD bar
+        ctx.fillStyle = 'rgba(0,0,0,0.65)'; ctx.fillRect(0,0,W,16);
+        ctx.fillStyle = '#00ff41'; ctx.font='bold 10px Nunito'; ctx.textAlign='left';
+        ctx.fillText('LVL '+this.level, 4, 11);
+        ctx.fillStyle = '#ff6b6b'; ctx.textAlign='center';
+        ctx.fillText('❤️'.repeat(this.lives), 140, 11);
+        ctx.fillStyle = '#fff'; ctx.textAlign='right';
+        ctx.fillText('🧻 '+this.score, W-4, 11);
 
         // Next level progress
         var progress = (this.foodEaten%5);

@@ -26,15 +26,14 @@ var marioGame = {
     },
 
     _setupCanvas: function() {
-        var self = this;
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-        setTimeout(function() {
-            var r = self.canvas.getBoundingClientRect();
-            self.canvas.width = Math.max(1, Math.floor(r.width));
-            self.canvas.height = Math.max(1, Math.floor(r.height));
-            self.ctx.setTransform(1,0,0,1,0,0);
-        }, 50);
+        var dpr = window.devicePixelRatio || 1;
+        var rect = this.canvas.getBoundingClientRect();
+        var w = rect.width || this.W, h = rect.height || this.H;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.canvas.width  = Math.max(1, Math.floor(w * dpr));
+        this.canvas.height = Math.max(1, Math.floor(h * dpr));
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
     },
 
     _bindTouch: function() {
@@ -380,6 +379,16 @@ var marioGame = {
         var m=this.mario, mx=m.x-cam;
         var blink=m.invincible>0&&Math.floor(m.invincible/5)%2===0;
         if(!blink)this.drawMario(ctx,mx+m.w/2,m.y+m.h,m.facing,m.frame,m.onGround);
+
+        // HUD bar
+        ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,16);
+        ctx.fillStyle='#ffe600'; ctx.font='bold 10px Nunito'; ctx.textAlign='left';
+        ctx.fillText('LVL '+this.level,4,11);
+        ctx.fillStyle='#ff6b6b'; ctx.textAlign='center';
+        var hearts=''; for(var h=0;h<this.lives;h++)hearts+='❤️';
+        ctx.fillText(hearts,140,11);
+        ctx.fillStyle='#fff'; ctx.textAlign='right';
+        ctx.fillText('🧻 '+this.score,W-4,11);
 
         // Banner
         if(this.banner&&this.banner.timer>0){

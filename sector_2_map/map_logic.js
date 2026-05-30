@@ -244,20 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (input) input.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
     var ni = document.getElementById('nickname-input');
     if (ni) ni.addEventListener('keydown', function(e) { if (e.key === 'Enter') saveNickname(); });
-
-    var exitBtn = document.getElementById('exit-btn');
-    if (exitBtn) {
-        exitBtn.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            exitGame();
-        }, { passive:false });
-    }
-
-    showLoading();
-    setTimeout(function() {
-        hideLoading();
-        document.getElementById('signup').style.display = 'flex';
-    }, 2400);
 });
 
 // ── NEAREST ──
@@ -475,9 +461,8 @@ function launchGame(gameType) {
     document.getElementById('game-screen').style.display = 'flex';
 
     var canvas = document.getElementById('game-canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.getBoundingClientRect();
+    canvas.width  = 280;
+    canvas.height = 280;
 
     document.getElementById('gb-level').textContent = 'LVL 1';
     document.getElementById('gb-score').textContent = '🧻 0';

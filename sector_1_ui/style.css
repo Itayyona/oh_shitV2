@@ -10,7 +10,7 @@ body.day   { background:#f5f5f5; color:#111; }
 /* ── LOADING SCREEN ── */
 #loading-screen {
     position:fixed; inset:0; z-index:9000;
-    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    display:none; align-items:center; justify-content:center; flex-direction:column;
 }
 body.night #loading-screen { background:#1a1a2e; }
 body.day   #loading-screen { background:#f5f5f5; }
@@ -29,7 +29,7 @@ body.day   .loading-bar { background:rgba(0,0,0,0.08); }
 /* ── SIGNUP ── */
 #signup {
     position:fixed; inset:0; z-index:500;
-    display:none; flex-direction:column; align-items:center; justify-content:center; gap:36px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:36px;
 }
 body.night #signup { background:#1a1a2e; }
 body.day   #signup { background:#f5f5f5; }
@@ -298,8 +298,6 @@ body.day   .btn-cancel { background:#f0f0f0; color:#555; }
 .game-select-inner {
     width:100%; max-width:480px; border-radius:28px 28px 0 0;
     padding:24px 20px 48px;
-    max-height:85vh;
-    overflow-y:auto;
 }
 body.night .game-select-inner { background:#1a1a2e; }
 body.day   .game-select-inner { background:#fff; }
@@ -338,167 +336,195 @@ body.day   .game-card-name { color:#111; }
 
 /* ── GAME SCREEN ── */
 #game-screen {
-    display:none !important;
-    position:fixed;
-    inset:0;
-    z-index:4000;
-    background:rgba(0,0,0,0.88);
-    align-items:center;
-    justify-content:center;
-    touch-action:none;
-    overflow:hidden;
+    display:none; position:fixed; inset:0; z-index:4000;
+    background:#1a1a2e; align-items:center; justify-content:center;
+    flex-direction:column; touch-action:none;
 }
+
+/* ── GAME BOY SHELL ── */
 .gameboy {
-    width:95vw;
-    max-width:420px;
-    height:95vh;
-    max-height:95vh;
-    background:#4a7c2f;
-    border-radius:24px;
-    padding:4vw;
-    box-sizing:border-box;
-    box-shadow:0 18px 40px rgba(0,0,0,0.28);
+    width:100vw;
+    height:100vh;
+    background:linear-gradient(160deg, #8b956d 0%, #6b7a52 40%, #5a6645 100%);
+    border-radius:0;
+    padding:0;
+    box-shadow:0 0 0 3px #4a5535, inset 0 1px 0 rgba(255,255,255,0.15);
+    display:grid;
+    grid-template-rows:55% 45%;
+    overflow:hidden;
+    touch-action:none;
+}
+
+/* ── SCREEN AREA ── */
+.gb-screen-wrap {
+    background:#3d4a2e;
     display:flex;
     flex-direction:column;
-    gap:2vh;
+    justify-content:flex-start;
+    padding:4vw;
+    box-shadow:inset 0 2px 8px rgba(0,0,0,0.5);
+    min-height:0;
+    height:100%;
 }
-.gb-top-bar {
-    width:100%;
+.gb-screen-label {
     text-align:center;
-    font-size:clamp(16px, 4vw, 20px);
+    font-size:clamp(10px, 3vw, 16px);
     font-weight:900;
-    letter-spacing:1px;
-    color:#ffffff;
+    color:#8b956d;
+    letter-spacing:3px;
+    margin-bottom:3vw;
+    opacity:0.8;
+}
+.gb-screen {
+    background:#8bac0f;
+    border-radius:18px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:inset 0 0 20px rgba(0,0,0,0.3);
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    min-height:0;
 }
 .gb-hud {
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:1rem;
+    padding:3vw 4vw;
+    background:rgba(0,0,0,0.2);
+    min-height:6vh;
 }
-#gb-level,
-#gb-score {
-    color:#ffffff;
-    font-size:clamp(12px, 3vw, 16px);
-    font-weight:900;
-}
-#exit-btn {
-    min-width:48px;
-    min-height:48px;
-    width:clamp(48px, 10vw, 56px);
-    height:clamp(48px, 10vw, 56px);
-    border-radius:50%;
+#gb-level { font-size:clamp(10px, 2.4vw, 16px); font-weight:900; color:#0f380f; letter-spacing:1px; }
+#gb-score { font-size:clamp(10px, 2.4vw, 16px); font-weight:900; color:#0f380f; }
+.gb-exit {
+    background:rgba(0,0,0,0.2);
     border:none;
-    background:#e53e3e;
-    color:#ffffff;
-    font-size:24px;
-    font-weight:900;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    color:#0f380f;
+    width:clamp(32px, 8vw, 44px);
+    height:clamp(32px, 8vw, 44px);
+    border-radius:50%;
+    font-size:clamp(12px, 3vw, 18px);
     cursor:pointer;
-    touch-action:manipulation;
-}
-#exit-btn:active {
-    transform:translateY(1px);
-}
-.gb-screen {
-    width:100%;
-    height:45vh;
-    background:#000000;
-    border-radius:18px;
-    overflow:hidden;
+    font-weight:900;
+    line-height:1;
     display:flex;
     align-items:center;
     justify-content:center;
 }
+
 #game-canvas {
     display:block;
     width:100%;
-    height:100%;
+    flex:1;
+    min-height:0;
     image-rendering:pixelated;
-    background:#000000;
 }
+
+/* ── CONTROLS ── */
 .gb-controls {
-    width:100%;
     display:flex;
+    flex-direction:column;
     justify-content:space-between;
-    align-items:flex-end;
-    gap:1rem;
-    flex-wrap:wrap;
+    padding:4vw 3vw;
+    gap:3vh;
+    height:100%;
+    min-height:0;
+    touch-action:manipulation;
 }
-.gb-dpad,
-.gb-center,
-.gb-action {
+
+/* D-PAD */
+.gb-dpad {
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:0.75rem;
-    flex:1 1 0;
+    justify-content:space-between;
+    gap:2.5vh;
+    flex:1;
+    min-height:0;
 }
-.gb-dpad .dpad-row {
+.dpad-row {
     display:flex;
-    gap:0.75rem;
-    width:100%;
     justify-content:center;
+    gap:3vw;
 }
-.dpad-btn,
-.gb-center-btn,
-.gb-action-btn {
-    min-width:48px;
-    min-height:48px;
-    width:clamp(48px, 14vw, 72px);
-    height:clamp(48px, 14vw, 72px);
-    border:none;
+.dpad-mid { gap:3vw; }
+.dpad-btn {
+    width:clamp(60px, 16vw, 90px);
+    height:clamp(60px, 16vw, 90px);
     border-radius:14px;
-    background:linear-gradient(180deg,#4a4a4a,#202020);
-    color:#ffffff;
-    font-size:clamp(16px, 4vw, 22px);
-    font-weight:900;
-    box-shadow:0 6px 0 rgba(0,0,0,0.28);
+    border:none;
     cursor:pointer;
+    font-size:clamp(18px, 4vw, 24px);
+    font-weight:900;
+    color:#3d4a2e;
+    background:linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%);
+    box-shadow:0 4px 0 #222, inset 0 1px 0 rgba(255,255,255,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:0.08s;
     touch-action:manipulation;
 }
-.dpad-btn:active,
-.gb-center-btn:active,
-.gb-action-btn:active {
-    transform:translateY(2px);
-    box-shadow:0 3px 0 rgba(0,0,0,0.22);
+.dpad-btn:active { transform:translateY(3px); box-shadow:0 2px 0 #222; }
+.dpad-center {
+    width:clamp(60px, 16vw, 90px);
+    height:clamp(60px, 16vw, 90px);
+    background:#444;
+    border-radius:10px;
 }
-.gb-center-btn {
-    width:100%;
-    max-width:140px;
-    border-radius:26px;
-    background:linear-gradient(180deg,#5a5a5a,#2b2b2b);
-}
-.gb-action {
-    flex-direction:row;
+
+/* CENTER BUTTONS */
+.gb-center-btns {
+    display:flex;
+    flex-direction:column;
+    gap:2vh;
+    align-items:center;
     justify-content:center;
-    width:100%;
+    flex:0.8;
+    min-height:0;
 }
-.gb-action-btn {
+.gb-select, .gb-start {
+    padding:calc(1.2vh + 0.8vw) calc(4vw + 2px);
+    border-radius:26px;
+    border:none;
+    cursor:pointer;
+    font-size:clamp(12px, 3vw, 18px);
+    font-weight:900;
+    letter-spacing:1px;
+    color:#3d4a2e;
+    background:linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%);
+    box-shadow:0 4px 0 #222;
+    touch-action:manipulation;
+    min-width:clamp(86px, 28vw, 140px);
+}
+.gb-select:active, .gb-start:active { transform:translateY(2px); box-shadow:0 2px 0 #222; }
+
+/* A/B BUTTONS */
+.gb-ab {
+    display:flex;
+    gap:5vw;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    min-height:0;
+}
+.gb-btn {
+    width:clamp(74px, 18vw, 102px);
+    height:clamp(74px, 18vw, 102px);
     border-radius:50%;
-    width:clamp(56px, 18vw, 80px);
-    height:clamp(56px, 18vw, 80px);
+    border:none;
+    cursor:pointer;
+    font-size:clamp(18px, 4vw, 24px);
+    font-weight:900;
+    color:#fff;
+    box-shadow:0 5px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition:0.08s;
+    touch-action:manipulation;
 }
-.gb-a { background:linear-gradient(180deg,#cc3333,#991111); }
-.gb-b { background:linear-gradient(180deg,#333399,#111166); }
-@media (max-width:520px) {
-    .gameboy {
-        padding:4vw;
-    }
-    .gb-controls {
-        flex-direction:column;
-        align-items:stretch;
-    }
-    .gb-action {
-        width:100%;
-    }
-    .gb-dpad,
-    .gb-center {
-        width:100%;
-    }
-}
+.gb-btn:active { transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,0.4); }
+.gb-a { background:linear-gradient(180deg, #cc3333 0%, #991111 100%); }
+.gb-b { background:linear-gradient(180deg, #333399 0%, #111166 100%); }
+
 /* ── NICKNAME SCREEN ── */
 #nickname-screen {
     position:fixed; inset:0; z-index:600;
