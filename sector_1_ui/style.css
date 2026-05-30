@@ -338,7 +338,7 @@ body.day   .game-card-name { color:#111; }
 
 /* ── GAME SCREEN ── */
 #game-screen {
-    display:none;
+    display:none !important;
     position:fixed;
     inset:0;
     z-index:4000;
