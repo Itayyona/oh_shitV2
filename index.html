@@ -284,15 +284,15 @@
             <div class="gb-controls">
                 <div class="gb-dpad">
                     <div class="dpad-row">
-                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('up')" onpointerup="gameInputEnd('up')">▲</button>
+                        <button class="dpad-btn" onclick="gameInput('up')" ontouchstart="event.preventDefault(); gameInput('up')" onpointerup="gameInputEnd('up')">▲</button>
                     </div>
                     <div class="dpad-row dpad-mid">
-                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('left')" onpointerup="gameInputEnd('left')">◀</button>
+                        <button class="dpad-btn" onclick="gameInput('left')" ontouchstart="event.preventDefault(); gameInput('left')" onpointerup="gameInputEnd('left')">◀</button>
                         <div class="dpad-center"></div>
-                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('right')" onpointerup="gameInputEnd('right')">▶</button>
+                        <button class="dpad-btn" onclick="gameInput('right')" ontouchstart="event.preventDefault(); gameInput('right')" onpointerup="gameInputEnd('right')">▶</button>
                     </div>
                     <div class="dpad-row">
-                        <button class="dpad-btn" ontouchstart="event.preventDefault()" onpointerdown="gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
+                        <button class="dpad-btn" onclick="gameInput('down')" ontouchstart="event.preventDefault(); gameInput('down')" onpointerup="gameInputEnd('down')">▼</button>
                     </div>
                 </div>
                 <div class="gb-center-btns">
@@ -300,8 +300,8 @@
                     <button class="gb-start" ontouchstart="event.preventDefault()" onclick="gameInput('start')">START</button>
                 </div>
                 <div class="gb-ab">
-                    <button class="gb-btn gb-b" ontouchstart="event.preventDefault()" onpointerdown="gameInput('b')">B</button>
-                    <button class="gb-btn gb-a" ontouchstart="event.preventDefault()" onpointerdown="gameInput('a')">A</button>
+                    <button class="gb-btn gb-b" onclick="gameInput('b')" ontouchstart="event.preventDefault(); gameInput('b')">B</button>
+                    <button class="gb-btn gb-a" onclick="gameInput('a')" ontouchstart="event.preventDefault(); gameInput('a')">A</button>
                 </div>
             </div>
         </div>

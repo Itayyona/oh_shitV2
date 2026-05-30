@@ -398,15 +398,13 @@ body.day   .game-card-name { color:#111; }
 #gb-level { font-size:clamp(10px, 2.4vw, 16px); font-weight:900; color:#0f380f; letter-spacing:1px; }
 #gb-score { font-size:clamp(10px, 2.4vw, 16px); font-weight:900; color:#0f380f; }
 .gb-exit {
-    background:rgba(0,0,0,0.2);
+    background:#e53e3e;
     border:none;
-    color:#0f380f;
-    min-width:60px;
-    min-height:60px;
-    width:clamp(60px, 12vw, 72px);
-    height:clamp(60px, 12vw, 72px);
+    color:#ffffff;
+    width:44px;
+    height:44px;
     border-radius:50%;
-    font-size:clamp(14px, 3vw, 20px);
+    font-size:18px;
     cursor:pointer;
     font-weight:900;
     line-height:1;
