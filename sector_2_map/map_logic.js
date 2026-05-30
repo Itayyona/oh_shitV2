@@ -252,6 +252,12 @@ document.addEventListener('DOMContentLoaded', function() {
             exitGame();
         }, { passive:false });
     }
+
+    showLoading();
+    setTimeout(function() {
+        hideLoading();
+        document.getElementById('signup').style.display = 'flex';
+    }, 2400);
 });
 
 // ── NEAREST ──
