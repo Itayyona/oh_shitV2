@@ -244,6 +244,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (input) input.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
     var ni = document.getElementById('nickname-input');
     if (ni) ni.addEventListener('keydown', function(e) { if (e.key === 'Enter') saveNickname(); });
+
+    var exitBtn = document.getElementById('exit-btn');
+    if (exitBtn) {
+        exitBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            exitGame();
+        }, { passive:false });
+    }
 });
 
 // ── NEAREST ──

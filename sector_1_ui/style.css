@@ -343,7 +343,6 @@ body.day   .game-card-name { color:#111; }
     inset:0;
     z-index:4000;
     background:rgba(0,0,0,0.88);
-    display:flex;
     align-items:center;
     justify-content:center;
     touch-action:none;
