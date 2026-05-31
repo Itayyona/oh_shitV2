@@ -26,14 +26,13 @@ function stopSnake() {
 function startSnake(canvas, toiletId) {
     stopSnake();
 
-    // Fill the full game-screen area
-    var gameScreen = document.getElementById('game-screen');
-    var gameBar    = document.querySelector('.game-bar');
-    var controls   = document.querySelector('.game-controls');
+    // Size canvas to fill the space between game-bar and game-controls
+    var gameBar  = document.querySelector('.game-bar');
+    var controls = document.querySelector('.game-controls');
 
-    var barH      = gameBar     ? gameBar.offsetHeight     : 48;
-    var controlsH = controls    ? controls.offsetHeight    : 160;
-    var availH    = (gameScreen ? gameScreen.offsetHeight : window.innerHeight) - barH - controlsH;
+    var barRect      = gameBar  ? gameBar.getBoundingClientRect()  : { height: 48 };
+    var controlsRect = controls ? controls.getBoundingClientRect() : { height: 160 };
+    var availH = window.innerHeight - barRect.height - controlsRect.height;
 
     canvas.width  = window.innerWidth;
     canvas.height = Math.max(180, availH);

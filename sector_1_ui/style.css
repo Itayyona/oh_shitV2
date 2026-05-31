@@ -388,9 +388,8 @@ body.day   .game-card-name { color:#111; }
     top:50px;
     left:0;
     width:100% !important;
-    height:100% !important;
     display:block;
-    background:#000;
+    background:#0d2b5e;
 }
 #game-screen .game-controls {
     position:fixed;
