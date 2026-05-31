@@ -26,13 +26,13 @@ function stopSnake() {
 function startSnake(canvas, toiletId) {
     stopSnake();
 
-    // Canvas fills the Game Boy screen area: 55vh minus the HUD strip
-    var gbHud   = document.querySelector('.gb-hud');
-    var hudRect = gbHud ? gbHud.getBoundingClientRect() : { height: 42 };
-    var screenH = Math.round(window.innerHeight * 0.55);
-
-    canvas.width  = window.innerWidth;
-    canvas.height = Math.max(180, screenH - Math.round(hudRect.height));
+    // Canvas fills the oval toilet bowl — measure after layout is visible
+    var bowlEl   = document.getElementById('toilet-bowl');
+    var bowlRect = bowlEl ? bowlEl.getBoundingClientRect() : null;
+    canvas.width  = bowlRect ? Math.round(bowlRect.width)  : window.innerWidth;
+    canvas.height = bowlRect ? Math.round(bowlRect.height) : Math.round(window.innerHeight * 0.40);
+    canvas.width  = Math.max(180, canvas.width);
+    canvas.height = Math.max(120, canvas.height);
     canvas.style.width  = canvas.width  + 'px';
     canvas.style.height = canvas.height + 'px';
 
@@ -226,9 +226,25 @@ function startSnake(canvas, toiletId) {
         var ox = snakeState.offsetX;
         var oy = snakeState.offsetY;
 
-        // Background — toilet bowl blue (dot-matrix texture is CSS overlay)
-        c.fillStyle = '#1a6ba0';
+        // Background — toilet water blue (#1a9fd4)
+        c.fillStyle = '#1a9fd4';
         c.fillRect(0, 0, W, H);
+
+        // Subtle grid lines
+        c.strokeStyle = 'rgba(255,255,255,0.07)';
+        c.lineWidth = 0.5;
+        for (var col = 0; col <= snakeState.cols; col++) {
+            c.beginPath();
+            c.moveTo(ox + col * cl, oy);
+            c.lineTo(ox + col * cl, oy + snakeState.rows * cl);
+            c.stroke();
+        }
+        for (var row = 0; row <= snakeState.rows; row++) {
+            c.beginPath();
+            c.moveTo(ox, oy + row * cl);
+            c.lineTo(ox + snakeState.cols * cl, oy + row * cl);
+            c.stroke();
+        }
 
         // Food — toilet roll 🧻
         if (snakeState.food) {

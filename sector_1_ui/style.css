@@ -334,7 +334,7 @@ body.night .game-card-name { color:#fff; }
 body.day   .game-card-name { color:#111; }
 .game-card-best { font-size:12px; font-weight:700; color:#ff6b35; }
 
-/* ── GAME SCREEN — Game Boy layout ── */
+/* ── GAME SCREEN — Toilet Bowl layout ── */
 #game-screen {
     display:none;
     position:fixed;
@@ -346,37 +346,35 @@ body.day   .game-card-name { color:#111; }
     touch-action:none;
 }
 
-/* ── Screen area — top 55% ── */
-.gb-screen-area {
+/* ── Toilet bowl screen area (top 55%) ── */
+.toilet-screen-area {
     height:55vh;
     width:100%;
     flex-shrink:0;
     display:flex;
     flex-direction:column;
+    background:#e8e8e8;
+    border-radius:0 0 32px 32px;
 }
-.gb-bezel {
-    flex:1;
-    background:#2d2d2d;
-    border-radius:0 0 18px 18px;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-}
-.gb-hud {
+
+/* Toilet lid = HUD / score strip */
+.toilet-lid {
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:6px 12px;
-    background:#111;
+    padding:7px 14px;
+    background:#4a7c2f;
+    border-radius:12px 12px 0 0;
     font-family:'Courier New',Courier,monospace;
     font-size:14px;
     font-weight:700;
-    color:#7fff00;
+    color:#c8f08a;
     flex-shrink:0;
     gap:8px;
     letter-spacing:1px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
 }
-.gb-hud #exit-btn {
+.toilet-lid #exit-btn {
     width:30px;
     height:30px;
     min-width:30px;
@@ -394,23 +392,74 @@ body.day   .game-card-name { color:#111; }
     pointer-events:all;
     -webkit-tap-highlight-color:transparent;
 }
-.gb-inner-screen {
+
+/* Ceramic outer casing */
+.toilet-outer {
     flex:1;
+    background:#e0e0e0;
+    border-radius:0 0 30px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 18px 14px;
+    box-shadow:inset 0 -4px 14px rgba(0,0,0,0.1);
+}
+
+/* Porcelain seat ring */
+.toilet-seat-ring {
+    width:100%;
+    height:100%;
+    background:#f0f0f0;
+    border-radius:48% 48% 50% 50% / 42% 42% 50% 50%;
+    box-shadow:
+        inset 0 10px 28px rgba(0,0,0,0.13),
+        inset 0 -6px 16px rgba(255,255,255,0.65),
+        0 4px 14px rgba(0,0,0,0.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px 20px;
+}
+
+/* Inner bowl — water area, clips canvas to oval */
+.toilet-bowl {
+    width:100%;
+    height:100%;
+    border-radius:48% 48% 50% 50% / 42% 42% 50% 50%;
     overflow:hidden;
     position:relative;
-    background:#1a6ba0;
-    box-shadow:inset 0 0 0 4px #fff;
+    background:radial-gradient(ellipse at 50% 45%, #2dbde8 0%, #1a9fd4 45%, #0e6ea0 100%);
+    box-shadow:
+        inset 0 4px 16px rgba(255,255,255,0.22),
+        inset 0 -10px 24px rgba(0,20,60,0.28),
+        inset 0 0 0 3px rgba(255,255,255,0.55);
 }
-/* dot-matrix LCD texture overlay */
-.gb-inner-screen::after {
+
+/* Static water shimmer — light reflecting off water surface */
+.toilet-bowl::before {
+    content:'';
+    position:absolute;
+    top:7%;
+    left:8%;
+    width:36%;
+    height:26%;
+    background:radial-gradient(ellipse,rgba(255,255,255,0.42) 0%,transparent 70%);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:3;
+}
+
+/* Dot-matrix texture over the canvas */
+.toilet-bowl::after {
     content:'';
     position:absolute;
     inset:0;
-    background-image:radial-gradient(circle,rgba(0,0,0,0.12) 1px,transparent 1px);
+    background-image:radial-gradient(circle,rgba(0,0,0,0.09) 1px,transparent 1px);
     background-size:4px 4px;
     pointer-events:none;
     z-index:2;
 }
+
 #game-canvas {
     display:block;
     position:relative;

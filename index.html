@@ -252,19 +252,25 @@
         </div>
     </div>
 
-    <!-- GAME SCREEN — Game Boy layout -->
+    <!-- GAME SCREEN — Toilet Bowl layout -->
     <div id="game-screen">
 
-        <!-- ── Screen section (top 55%) ── -->
-        <div class="gb-screen-area">
-            <div class="gb-bezel">
-                <div class="gb-hud">
-                    <span id="gb-level">LVL 1</span>
-                    <span id="gb-score">🧻 0</span>
-                    <button id="exit-btn" type="button" onclick="exitGame()" ontouchstart="event.preventDefault();event.stopPropagation();exitGame()">✕</button>
-                </div>
-                <div class="gb-inner-screen">
-                    <canvas id="game-canvas"></canvas>
+        <!-- ── Toilet bowl screen (top 55%) ── -->
+        <div class="toilet-screen-area">
+            <!-- Lid = HUD strip -->
+            <div class="toilet-lid">
+                <span id="gb-level">LVL 1</span>
+                <span id="gb-score">🧻 0</span>
+                <button id="exit-btn" type="button" onclick="exitGame()" ontouchstart="event.preventDefault();event.stopPropagation();exitGame()">✕</button>
+            </div>
+            <!-- Ceramic outer casing -->
+            <div class="toilet-outer">
+                <!-- Seat ring -->
+                <div class="toilet-seat-ring">
+                    <!-- Water bowl — clips canvas to oval -->
+                    <div class="toilet-bowl" id="toilet-bowl">
+                        <canvas id="game-canvas"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
