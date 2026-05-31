@@ -26,13 +26,11 @@ function stopSnake() {
 function startSnake(canvas, toiletId) {
     stopSnake();
 
-    // Canvas fills the oval toilet bowl — measure after layout is visible
-    var bowlEl   = document.getElementById('toilet-bowl');
-    var bowlRect = bowlEl ? bowlEl.getBoundingClientRect() : null;
-    canvas.width  = bowlRect ? Math.round(bowlRect.width)  : window.innerWidth;
-    canvas.height = bowlRect ? Math.round(bowlRect.height) : Math.round(window.innerHeight * 0.40);
-    canvas.width  = Math.max(180, canvas.width);
-    canvas.height = Math.max(120, canvas.height);
+    // Canvas sized from the rendered toilet bowl after layout is fully visible
+    var bowl = document.getElementById('toilet-bowl');
+    var rect = bowl.getBoundingClientRect();
+    canvas.width  = Math.floor(rect.width);
+    canvas.height = Math.floor(rect.height);
     canvas.style.width  = canvas.width  + 'px';
     canvas.style.height = canvas.height + 'px';
 

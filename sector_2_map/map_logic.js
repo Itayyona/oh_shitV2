@@ -465,7 +465,7 @@ function launchGame(gameType) {
         if (gameType === 'snake' && typeof startSnake === 'function')   startSnake(canvas, currentToiletId);
         if (gameType === 'tetris' && typeof startTetris === 'function')  startTetris(canvas, currentToiletId);
         if (gameType === 'mario' && typeof startMario === 'function')   startMario(canvas, currentToiletId);
-    }, 300);
+    }, 400);
 }
 
 function exitGame() {
