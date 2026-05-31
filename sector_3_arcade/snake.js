@@ -26,16 +26,13 @@ function stopSnake() {
 function startSnake(canvas, toiletId) {
     stopSnake();
 
-    // Size canvas to fill the space between game-bar and game-controls
-    var gameBar  = document.querySelector('.game-bar');
-    var controls = document.querySelector('.game-controls');
-
-    var barRect      = gameBar  ? gameBar.getBoundingClientRect()  : { height: 48 };
-    var controlsRect = controls ? controls.getBoundingClientRect() : { height: 160 };
-    var availH = window.innerHeight - barRect.height - controlsRect.height;
+    // Canvas fills the Game Boy screen area: 55vh minus the HUD strip
+    var gbHud   = document.querySelector('.gb-hud');
+    var hudRect = gbHud ? gbHud.getBoundingClientRect() : { height: 42 };
+    var screenH = Math.round(window.innerHeight * 0.55);
 
     canvas.width  = window.innerWidth;
-    canvas.height = Math.max(180, availH);
+    canvas.height = Math.max(180, screenH - Math.round(hudRect.height));
     canvas.style.width  = canvas.width  + 'px';
     canvas.style.height = canvas.height + 'px';
 
@@ -221,17 +218,6 @@ function startSnake(canvas, toiletId) {
 
     // ── draw ─────────────────────────────────────────────────────
 
-    function drawRoundedRect(c, x, y, w, h, r) {
-        if (c.roundRect) { c.roundRect(x, y, w, h, r); return; }
-        c.beginPath();
-        c.moveTo(x + r, y);
-        c.lineTo(x + w - r, y);  c.quadraticCurveTo(x + w, y,     x + w, y + r);
-        c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        c.lineTo(x + r, y + h);  c.quadraticCurveTo(x,     y + h, x,     y + h - r);
-        c.lineTo(x, y + r);      c.quadraticCurveTo(x,     y,     x + r, y);
-        c.closePath();
-    }
-
     function draw() {
         var c  = snakeState.ctx;
         var W  = snakeState.canvas.width;
@@ -240,106 +226,84 @@ function startSnake(canvas, toiletId) {
         var ox = snakeState.offsetX;
         var oy = snakeState.offsetY;
 
-        // Background — dark blue like the app theme
-        c.fillStyle = '#0d2b5e';
+        // Background — toilet bowl blue (dot-matrix texture is CSS overlay)
+        c.fillStyle = '#1a6ba0';
         c.fillRect(0, 0, W, H);
 
-        // Grid lines (subtle)
-        c.strokeStyle = 'rgba(255,255,255,0.04)';
-        c.lineWidth = 1;
-        for (var col = 0; col <= snakeState.cols; col++) {
-            c.beginPath();
-            c.moveTo(ox + col * cl, oy);
-            c.lineTo(ox + col * cl, oy + snakeState.rows * cl);
-            c.stroke();
-        }
-        for (var row = 0; row <= snakeState.rows; row++) {
-            c.beginPath();
-            c.moveTo(ox, oy + row * cl);
-            c.lineTo(ox + snakeState.cols * cl, oy + row * cl);
-            c.stroke();
-        }
-
-        // Food — toilet emoji 🚽
+        // Food — toilet roll 🧻
         if (snakeState.food) {
             var fx = ox + snakeState.food.x * cl + cl / 2;
             var fy = oy + snakeState.food.y * cl + cl / 2;
-            c.font      = Math.max(10, cl - 4) + 'px serif';
+            c.font         = Math.max(10, cl - 2) + 'px serif';
             c.textAlign    = 'center';
             c.textBaseline = 'middle';
-            c.fillText('🚽', fx, fy);
+            c.fillText('🧻', fx, fy);
         }
 
-        // Snake body
+        // Snake — pixel art, poop brown, hard square blocks
         for (var i = snakeState.cells.length - 1; i >= 0; i--) {
             var seg  = snakeState.cells[i];
             var segX = ox + seg.x * cl;
             var segY = oy + seg.y * cl;
-            var pad  = 2;
 
             if (i === 0) {
-                // Head — bright green
-                c.fillStyle = '#4ade80';
-                drawRoundedRect(c, segX + pad, segY + pad, cl - pad * 2, cl - pad * 2, 5);
-                c.fill();
+                // Head
+                c.fillStyle = '#7B4A2D';
+                c.fillRect(segX + 1, segY + 1, cl - 2, cl - 2);
 
-                // Eyes — direction-aware
-                var ex = cl * 0.22;
-                var ey = cl * 0.22;
-                var er = Math.max(1.5, cl * 0.09);
-                var cx = segX + cl / 2;
-                var cy = segY + cl / 2;
+                // Pixel art eyes — 2×2 blocks, direction-aware
+                var es  = Math.max(2, Math.floor(cl * 0.18));
+                var ep  = Math.max(2, Math.floor(cl * 0.22));
                 var dir = snakeState.direction;
-                var eye1, eye2;
+                var e1x, e1y, e2x, e2y;
 
-                if (dir.x === 1) { // right
-                    eye1 = { x: cx + ex, y: cy - ey };
-                    eye2 = { x: cx + ex, y: cy + ey };
-                } else if (dir.x === -1) { // left
-                    eye1 = { x: cx - ex, y: cy - ey };
-                    eye2 = { x: cx - ex, y: cy + ey };
-                } else if (dir.y === -1) { // up
-                    eye1 = { x: cx - ex, y: cy - ey };
-                    eye2 = { x: cx + ex, y: cy - ey };
-                } else { // down
-                    eye1 = { x: cx - ex, y: cy + ey };
-                    eye2 = { x: cx + ex, y: cy + ey };
+                if (dir.x === 1) {
+                    e1x = segX + cl - ep - es; e1y = segY + ep;
+                    e2x = segX + cl - ep - es; e2y = segY + cl - ep - es;
+                } else if (dir.x === -1) {
+                    e1x = segX + ep; e1y = segY + ep;
+                    e2x = segX + ep; e2y = segY + cl - ep - es;
+                } else if (dir.y === -1) {
+                    e1x = segX + ep;           e1y = segY + ep;
+                    e2x = segX + cl - ep - es; e2y = segY + ep;
+                } else {
+                    e1x = segX + ep;           e1y = segY + cl - ep - es;
+                    e2x = segX + cl - ep - es; e2y = segY + cl - ep - es;
                 }
 
                 c.fillStyle = '#fff';
-                c.beginPath(); c.arc(eye1.x, eye1.y, er, 0, Math.PI * 2); c.fill();
-                c.beginPath(); c.arc(eye2.x, eye2.y, er, 0, Math.PI * 2); c.fill();
+                c.fillRect(e1x, e1y, es, es);
+                c.fillRect(e2x, e2y, es, es);
                 c.fillStyle = '#111';
-                c.beginPath(); c.arc(eye1.x, eye1.y, er * 0.5, 0, Math.PI * 2); c.fill();
-                c.beginPath(); c.arc(eye2.x, eye2.y, er * 0.5, 0, Math.PI * 2); c.fill();
+                c.fillRect(e1x + 1, e1y + 1, es - 1, es - 1);
+                c.fillRect(e2x + 1, e2y + 1, es - 1, es - 1);
 
             } else {
-                // Body — slightly darker green, alternating shade
-                c.fillStyle = (i % 2 === 0) ? '#22c55e' : '#16a34a';
-                drawRoundedRect(c, segX + 2, segY + 2, cl - 4, cl - 4, 4);
-                c.fill();
+                // Body — alternating brown shades
+                c.fillStyle = (i % 2 === 0) ? '#7B4A2D' : '#5C3420';
+                c.fillRect(segX + 1, segY + 1, cl - 2, cl - 2);
             }
         }
 
         // Game over overlay
         if (snakeState.gameOver) {
-            c.fillStyle = 'rgba(0,0,0,0.72)';
+            c.fillStyle = 'rgba(0,0,0,0.78)';
             c.fillRect(0, 0, W, H);
 
             c.textAlign    = 'center';
             c.textBaseline = 'middle';
 
             c.fillStyle = '#ff4444';
-            c.font      = 'bold ' + Math.max(22, Math.round(H * 0.09)) + 'px Nunito, sans-serif';
-            c.fillText('💩 GAME OVER', W / 2, H * 0.32);
+            c.font      = 'bold ' + Math.max(16, Math.round(H * 0.09)) + 'px "Courier New",monospace';
+            c.fillText('GAME OVER 💩', W / 2, H * 0.32);
 
-            c.fillStyle = '#fff';
-            c.font      = Math.max(14, Math.round(H * 0.055)) + 'px Nunito, sans-serif';
-            c.fillText('Score: ' + snakeState.score + '  Best: ' + snakeState.bestScore, W / 2, H * 0.50);
+            c.fillStyle = '#7fff00';
+            c.font      = Math.max(11, Math.round(H * 0.055)) + 'px "Courier New",monospace';
+            c.fillText('SCORE:' + snakeState.score + '  BEST:' + snakeState.bestScore, W / 2, H * 0.50);
 
             c.fillStyle = '#facc15';
-            c.font      = Math.max(12, Math.round(H * 0.045)) + 'px Nunito, sans-serif';
-            c.fillText('Tap or press A to restart', W / 2, H * 0.66);
+            c.font      = Math.max(10, Math.round(H * 0.045)) + 'px "Courier New",monospace';
+            c.fillText('TAP OR [A] TO RESTART', W / 2, H * 0.66);
         }
     }
 

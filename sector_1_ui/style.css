@@ -334,125 +334,252 @@ body.night .game-card-name { color:#fff; }
 body.day   .game-card-name { color:#111; }
 .game-card-best { font-size:12px; font-weight:700; color:#ff6b35; }
 
-/* ── GAME SCREEN ── */
+/* ── GAME SCREEN — Game Boy layout ── */
 #game-screen {
     display:none;
     position:fixed;
     inset:0;
     z-index:1000;
-    background:#000;
+    flex-direction:column;
+    overflow:hidden;
+    background:#1a1a1a;
+    touch-action:none;
 }
 
-#game-screen .game-bar {
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    height:50px;
-    background:#111;
-    border-bottom:1px solid rgba(255,255,255,0.08);
+/* ── Screen area — top 55% ── */
+.gb-screen-area {
+    height:55vh;
+    width:100%;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+}
+.gb-bezel {
+    flex:1;
+    background:#2d2d2d;
+    border-radius:0 0 18px 18px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+.gb-hud {
     display:flex;
     align-items:center;
-    padding:0 12px;
     justify-content:space-between;
-    gap:12px;
-    z-index:1000;
+    padding:6px 12px;
+    background:#111;
+    font-family:'Courier New',Courier,monospace;
+    font-size:14px;
+    font-weight:700;
+    color:#7fff00;
+    flex-shrink:0;
+    gap:8px;
+    letter-spacing:1px;
 }
-#game-screen .game-bar-left,
-#game-screen .game-bar-center {
+.gb-hud #exit-btn {
+    width:30px;
+    height:30px;
+    min-width:30px;
+    background:#8B0000;
     color:#fff;
-    font-size:16px;
-    font-weight:900;
-}
-#game-screen #exit-btn {
-    position:fixed;
-    top:12px;
-    right:12px;
-    width:48px;
-    height:48px;
-    background:red;
-    color:#fff;
-    border-radius:50%;
-    font-size:24px;
     border:none;
+    border-radius:50%;
+    font-size:13px;
+    font-weight:900;
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
-    z-index:9999;
     touch-action:auto;
     pointer-events:all;
+    -webkit-tap-highlight-color:transparent;
 }
-#game-screen #game-canvas {
-    position:fixed;
-    top:50px;
-    left:0;
-    width:100% !important;
+.gb-inner-screen {
+    flex:1;
+    overflow:hidden;
+    position:relative;
+    background:#1a6ba0;
+    box-shadow:inset 0 0 0 4px #fff;
+}
+/* dot-matrix LCD texture overlay */
+.gb-inner-screen::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle,rgba(0,0,0,0.12) 1px,transparent 1px);
+    background-size:4px 4px;
+    pointer-events:none;
+    z-index:2;
+}
+#game-canvas {
     display:block;
-    background:#0d2b5e;
+    position:relative;
+    z-index:1;
+    touch-action:none;
 }
-#game-screen .game-controls {
-    position:fixed;
-    bottom:0;
-    left:0;
+
+/* ── Controller shell — bottom 45% ── */
+.gb-shell {
+    height:45vh;
     width:100%;
-    height:40vh;
-    background:rgba(0,0,0,0.7);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:16px;
-    gap:12px;
-    box-sizing:border-box;
-}
-#game-screen .controls-side {
+    flex-shrink:0;
+    background:#1a1a1a;
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
-    gap:12px;
+    justify-content:space-between;
+    padding:14px 20px 18px;
+    box-sizing:border-box;
+    overflow:hidden;
+    touch-action:auto;
 }
-#game-screen .controls-left,
-#game-screen .controls-right {
-    flex:1;
-}
-#game-screen .controls-center {
-    flex:1;
-    justify-content:center;
-}
-#game-screen .controls-center .control-btn.wide {
-    width:120px;
-}
-#game-screen .control-row {
+.gb-controls-row {
     display:flex;
-    gap:12px;
     align-items:center;
-    justify-content:center;
+    justify-content:space-between;
+    width:100%;
+    flex:1;
 }
-#game-screen .control-btn {
-    min-width:56px;
-    min-height:56px;
+
+/* D-PAD */
+.gb-dpad {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex-shrink:0;
+}
+.dpad-middle-row {
+    display:flex;
+    align-items:center;
+}
+.dpad-btn {
     width:56px;
     height:56px;
-    font-size:20px;
+    min-width:56px;
+    min-height:56px;
+    background:#3a3a3a;
+    color:#aaa;
+    border:none;
+    font-size:16px;
     font-weight:900;
-    color:#fff;
-    background:rgba(255,255,255,0.1);
-    border:1px solid rgba(255,255,255,0.18);
-    border-radius:14px;
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
-    touch-action:auto;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    -webkit-user-select:none;
 }
-#game-screen .control-btn.wide {
-    border-radius:18px;
-    padding:0 16px;
-    min-width:96px;
+.dpad-btn:active { background:#505050; color:#fff; }
+.dpad-up    { border-radius:6px 6px 0 0; }
+.dpad-down  { border-radius:0 0 6px 6px; }
+.dpad-left  { border-radius:6px 0 0 6px; }
+.dpad-right { border-radius:0 6px 6px 0; }
+.dpad-center-dot {
+    width:24px;
+    height:56px;
+    background:#3a3a3a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
 }
-#game-screen .control-btn:active {
-    transform:translateY(2px);
+.dpad-center-dot::after {
+    content:'';
+    width:10px;
+    height:10px;
+    background:#555;
+    border-radius:50%;
+}
+
+/* SELECT / START / BRAND */
+.gb-meta-btns {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    flex:1;
+    justify-content:center;
+    padding:0 10px;
+}
+.gb-pill-btn {
+    background:#2e2e2e;
+    color:#bbb;
+    border:none;
+    border-radius:20px;
+    padding:7px 14px;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:1.5px;
+    cursor:pointer;
+    touch-action:manipulation;
+    min-width:68px;
+    min-height:28px;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    -webkit-user-select:none;
+    box-shadow:0 3px 0 #111;
+}
+.gb-pill-btn:active { box-shadow:none; transform:translateY(2px); }
+.gb-brand {
+    font-size:9px;
+    color:#3d3d3d;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-align:center;
+    margin-top:2px;
+}
+
+/* A / B BUTTONS */
+.gb-ab {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    flex-shrink:0;
+}
+.gb-ab-btn {
+    width:56px;
+    height:56px;
+    min-width:56px;
+    min-height:56px;
+    background:#8B0000;
+    color:#fff;
+    border:none;
+    border-radius:50%;
+    font-size:15px;
+    font-weight:900;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    touch-action:manipulation;
+    box-shadow:0 4px 0 #5a0000;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    -webkit-user-select:none;
+}
+.gb-ab-btn:active { box-shadow:0 1px 0 #5a0000; transform:translateY(3px); }
+
+/* SPEAKER GRILLE */
+.gb-bottom-row {
+    display:flex;
+    justify-content:flex-end;
+    width:100%;
+    flex-shrink:0;
+}
+.gb-speaker {
+    display:grid;
+    grid-template-columns:repeat(3,8px);
+    grid-template-rows:repeat(4,8px);
+    gap:5px;
+}
+.sp-dot {
+    width:8px;
+    height:8px;
+    background:#2a2a2a;
+    border-radius:50%;
 }
 
 /* ── NICKNAME SCREEN ── */
