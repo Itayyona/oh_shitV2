@@ -581,8 +581,18 @@ function startSnake(canvas, toiletId) {
     if (food) placeFood();
   });
 
-  // ── Bootstrap — canvas is already sized when startSnake() is called ───────
-  init();
-  _snakeRafId         = requestAnimationFrame(loop);
-  window._gameLoopRaf = _snakeRafId;
+  // ── Bootstrap — poll until canvas has real dimensions ────────────────────
+  function tryStart() {
+    var r = canvas.getBoundingClientRect();
+    if (r.width > 10 && r.height > 10) {
+      canvas.width  = Math.round(r.width);
+      canvas.height = Math.round(r.height);
+      init();
+      _snakeRafId         = requestAnimationFrame(loop);
+      window._gameLoopRaf = _snakeRafId;
+    } else {
+      setTimeout(tryStart, 50);
+    }
+  }
+  tryStart();
 }
