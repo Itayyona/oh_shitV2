@@ -454,17 +454,22 @@ function closeGameSelect() {
 function launchGame(gameType) {
     document.getElementById('game-select').style.display = 'none';
     document.getElementById('game-screen').style.display = 'flex';
-    document.getElementById('gb-level').textContent = 'LVL 1';
-    document.getElementById('gb-score').textContent = '🧻 0';
+    var lvl = document.getElementById('hud-level');
+    var scr = document.getElementById('hud-score');
+    if (lvl) lvl.textContent = 'LVL: 1';
+    if (scr) scr.textContent = '🧻 —';
     var canvas = document.getElementById('game-canvas');
     setTimeout(function() {
-        var rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        if (gameType === 'pacman' && typeof startPacman === 'function')  startPacman(canvas, currentToiletId);
-        if (gameType === 'snake' && typeof startSnake === 'function')   startSnake(canvas, currentToiletId);
-        if (gameType === 'tetris' && typeof startTetris === 'function')  startTetris(canvas, currentToiletId);
-        if (gameType === 'mario' && typeof startMario === 'function')   startMario(canvas, currentToiletId);
+        var bowlFrame = document.querySelector('.bowl-frame');
+        if (bowlFrame) {
+            var rect = bowlFrame.getBoundingClientRect();
+            canvas.width  = Math.floor(rect.width);
+            canvas.height = Math.floor(rect.height);
+        }
+        if (gameType === 'snake' && typeof startSnake === 'function') startSnake(canvas, currentToiletId);
+        if (gameType === 'tetris' && typeof startTetris === 'function') startTetris(canvas, currentToiletId);
+        if (gameType === 'pacman' && typeof startPacman === 'function') startPacman(canvas, currentToiletId);
+        if (gameType === 'mario' && typeof startMario === 'function') startMario(canvas, currentToiletId);
     }, 400);
 }
 
