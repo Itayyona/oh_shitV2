@@ -334,302 +334,237 @@ body.night .game-card-name { color:#fff; }
 body.day   .game-card-name { color:#111; }
 .game-card-best { font-size:12px; font-weight:700; color:#ff6b35; }
 
-/* ── GAME SCREEN — Toilet Bowl layout ── */
-#game-screen {
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:1000;
-    flex-direction:column;
-    overflow:hidden;
-    background:#1a1a1a;
-    touch-action:none;
+/* ── GAME SCREEN — snake-test layout ── */
+
+/* ── TOP 62vh — toilet scene ─────────────────────────────────────────── */
+.toilet-top {
+  height: 62vh;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #0b0b1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0 4px;
 }
 
-/* ── Toilet bowl screen area (top 55%) ── */
-.toilet-screen-area {
-    height:55vh;
-    width:100%;
-    flex-shrink:0;
-    display:flex;
-    flex-direction:column;
-    background:#e8e8e8;
-    border-radius:0 0 32px 32px;
+/* HUD bar */
+.hud {
+  width: 95vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  background: #000;
+  border: 1px solid #222;
+  border-radius: 6px;
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-size: clamp(10px, 2.2vw, 13px);
+  flex-shrink: 0;
+  gap: 4px;
 }
 
-/* Toilet lid = HUD / score strip */
-.toilet-lid {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:7px 14px;
-    background:#4a7c2f;
-    border-radius:12px 12px 0 0;
-    font-family:'Courier New',Courier,monospace;
-    font-size:14px;
-    font-weight:700;
-    color:#c8f08a;
-    flex-shrink:0;
-    gap:8px;
-    letter-spacing:1px;
-    box-shadow:0 3px 8px rgba(0,0,0,0.25);
-}
-.toilet-lid #exit-btn {
-    width:30px;
-    height:30px;
-    min-width:30px;
-    background:#8B0000;
-    color:#fff;
-    border:none;
-    border-radius:50%;
-    font-size:13px;
-    font-weight:900;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    touch-action:auto;
-    pointer-events:all;
-    -webkit-tap-highlight-color:transparent;
+#hud-score, #hud-best {
+  font-weight: 700;
+  color: #00ff44;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(0, 255, 68, 0.4);
 }
 
-/* Ceramic outer casing */
-.toilet-outer {
-    flex:1;
-    background:#e0e0e0;
-    border-radius:0 0 30px 30px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:10px 18px 14px;
-    box-shadow:inset 0 -4px 14px rgba(0,0,0,0.1);
+#hud-lives {
+  font-size: clamp(14px, 3.8vw, 20px);
+  letter-spacing: 2px;
+  line-height: 1;
+  min-width: clamp(44px, 10vw, 62px);
+  text-align: center;
 }
 
-/* Porcelain seat ring */
-.toilet-seat-ring {
-    width:100%;
-    height:100%;
-    background:#f0f0f0;
-    border-radius:48% 48% 50% 50% / 42% 42% 50% 50%;
-    box-shadow:
-        inset 0 10px 28px rgba(0,0,0,0.13),
-        inset 0 -6px 16px rgba(255,255,255,0.65),
-        0 4px 14px rgba(0,0,0,0.15);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:16px 20px;
+#hud-level {
+  font-weight: 900;
+  color: #FFD700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
 }
 
-/* Inner bowl — water area, clips canvas to oval */
-.toilet-bowl {
-    width:100%;
-    height:100%;
-    border-radius:48% 48% 50% 50% / 42% 42% 50% 50%;
-    overflow:hidden;
-    position:relative;
-    background:radial-gradient(ellipse at 50% 45%, #2dbde8 0%, #1a9fd4 45%, #0e6ea0 100%);
-    box-shadow:
-        inset 0 4px 16px rgba(255,255,255,0.22),
-        inset 0 -10px 24px rgba(0,20,60,0.28),
-        inset 0 0 0 3px rgba(255,255,255,0.55);
+/* One ceramic toilet unit — tank + bowl as a single piece */
+.toilet-unit {
+  width: 82vw;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.6));
 }
 
-/* Static water shimmer — light reflecting off water surface */
-.toilet-bowl::before {
-    content:'';
-    position:absolute;
-    top:7%;
-    left:8%;
-    width:36%;
-    height:26%;
-    background:radial-gradient(ellipse,rgba(255,255,255,0.42) 0%,transparent 70%);
-    border-radius:50%;
-    pointer-events:none;
-    z-index:3;
+/* Cistern */
+.toilet-tank {
+  width: 50%;
+  height: 60px;
+  flex-shrink: 0;
+  background: #e8e6e0;
+  border-radius: 14px 14px 0 0;
+  margin-bottom: -2px;
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.75);
 }
 
-/* Dot-matrix texture over the canvas */
-.toilet-bowl::after {
-    content:'';
-    position:absolute;
-    inset:0;
-    background-image:radial-gradient(circle,rgba(0,0,0,0.09) 1px,transparent 1px);
-    background-size:4px 4px;
-    pointer-events:none;
-    z-index:2;
+/* Bowl */
+.toilet-rim {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border-radius: 0 0 55% 55% / 0 0 40% 40%;
+  background: #e8e6e0;
+  box-shadow:
+    inset 0 4px 14px rgba(255, 255, 255, 0.65),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Canvas play area */
+.bowl-frame {
+  position: absolute;
+  width: 68%;
+  height: 82%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 6px 22px rgba(0, 0, 0, 0.58),
+    inset 0 -3px 10px rgba(0, 40, 70, 0.42);
 }
 
 #game-canvas {
-    display:block;
-    position:relative;
-    z-index:1;
-    touch-action:none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
 }
 
-/* ── Controller shell — bottom 45% ── */
-.gb-shell {
-    height:45vh;
-    width:100%;
-    flex-shrink:0;
-    background:#1a1a1a;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px 20px 18px;
-    box-sizing:border-box;
-    overflow:hidden;
-    touch-action:auto;
-}
-.gb-controls-row {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    width:100%;
-    flex:1;
+/* ── BOTTOM 38vh — controls only ──────────────────────────────────────── */
+.controller {
+  height: 38vh;
+  flex-shrink: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, #2d2d2d 0%, transparent 60%),
+    linear-gradient(180deg, #222 0%, #1a1a1a 55%, #121212 100%);
+  border-top: 2px solid #3c3c3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-/* D-PAD */
-.gb-dpad {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    flex-shrink:0;
+.controller::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+  pointer-events: none;
 }
-.dpad-middle-row {
-    display:flex;
-    align-items:center;
+
+/* ── D-PAD ────────────────────────────────────────────────────────────── */
+.dpad {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  flex-shrink: 0;
 }
+
 .dpad-btn {
-    width:56px;
-    height:56px;
-    min-width:56px;
-    min-height:56px;
-    background:#3a3a3a;
-    color:#aaa;
-    border:none;
-    font-size:16px;
-    font-weight:900;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    touch-action:manipulation;
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
-    -webkit-user-select:none;
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  background: #2e2e2e;
+  color: #e0e0e0;
+  font-size: 26px;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 5px 0 #111,
+    0 7px 12px rgba(0, 0, 0, 0.6),
+    inset 0 1px rgba(255, 255, 255, 0.08);
+  transition: background 60ms ease, transform 60ms ease, box-shadow 60ms ease;
 }
-.dpad-btn:active { background:#505050; color:#fff; }
-.dpad-up    { border-radius:6px 6px 0 0; }
-.dpad-down  { border-radius:0 0 6px 6px; }
-.dpad-left  { border-radius:6px 0 0 6px; }
-.dpad-right { border-radius:0 6px 6px 0; }
-.dpad-center-dot {
-    width:24px;
-    height:56px;
-    background:#3a3a3a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-}
-.dpad-center-dot::after {
-    content:'';
-    width:10px;
-    height:10px;
-    background:#555;
-    border-radius:50%;
+.dpad-btn:active {
+  background: #555;
+  box-shadow: 0 1px 0 #111, 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* SELECT / START / BRAND */
-.gb-meta-btns {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-    flex:1;
-    justify-content:center;
-    padding:0 10px;
-}
-.gb-pill-btn {
-    background:#2e2e2e;
-    color:#bbb;
-    border:none;
-    border-radius:20px;
-    padding:7px 14px;
-    font-size:9px;
-    font-weight:900;
-    letter-spacing:1.5px;
-    cursor:pointer;
-    touch-action:manipulation;
-    min-width:68px;
-    min-height:28px;
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
-    -webkit-user-select:none;
-    box-shadow:0 3px 0 #111;
-}
-.gb-pill-btn:active { box-shadow:none; transform:translateY(2px); }
-.gb-brand {
-    font-size:9px;
-    color:#3d3d3d;
-    font-weight:700;
-    letter-spacing:0.5px;
-    text-align:center;
-    margin-top:2px;
+#btn-up           { top: 0;    left: 50%; transform: translateX(-50%); }
+#btn-up:active    { transform: translateX(-50%) scale(0.92); }
+#btn-down         { bottom: 0; left: 50%; transform: translateX(-50%); }
+#btn-down:active  { transform: translateX(-50%) scale(0.92); }
+#btn-left         { top: 50%;  left: 0;   transform: translateY(-50%); }
+#btn-left:active  { transform: translateY(-50%) scale(0.92); }
+#btn-right        { top: 50%;  right: 0;  transform: translateY(-50%); }
+#btn-right:active { transform: translateY(-50%) scale(0.92); }
+
+/* ── Brand label ─────────────────────────────────────────────────────── */
+.ctrl-brand {
+  width: 100%;
+  min-width: 180px;
+  text-align: center;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
-/* A / B BUTTONS */
-.gb-ab {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-    flex-shrink:0;
+.brand-title {
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-size: 16px;
+  font-weight: 900;
+  color: #FFD700;
+  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+  white-space: nowrap;
+  line-height: 1.2;
 }
-.gb-ab-btn {
-    width:56px;
-    height:56px;
-    min-width:56px;
-    min-height:56px;
-    background:#8B0000;
-    color:#fff;
-    border:none;
-    border-radius:50%;
-    font-size:15px;
-    font-weight:900;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    touch-action:manipulation;
-    box-shadow:0 4px 0 #5a0000;
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
-    -webkit-user-select:none;
-}
-.gb-ab-btn:active { box-shadow:0 1px 0 #5a0000; transform:translateY(3px); }
 
-/* SPEAKER GRILLE */
-.gb-bottom-row {
-    display:flex;
-    justify-content:flex-end;
-    width:100%;
-    flex-shrink:0;
+.brand-tagline {
+  font-size: 10px;
+  color: #aaa;
+  font-style: italic;
+  line-height: 1.4;
+  margin-top: 3px;
 }
-.gb-speaker {
-    display:grid;
-    grid-template-columns:repeat(3,8px);
-    grid-template-rows:repeat(4,8px);
-    gap:5px;
+
+/* ── EXIT button ─────────────────────────────────────────────────────── */
+#exit-btn {
+  width: 28px;
+  height: 28px;
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 60ms ease;
 }
-.sp-dot {
-    width:8px;
-    height:8px;
-    background:#2a2a2a;
-    border-radius:50%;
-}
+#exit-btn:active { transform: scale(0.88); }
+
 
 /* ── NICKNAME SCREEN ── */
 #nickname-screen {
