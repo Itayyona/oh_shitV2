@@ -601,6 +601,7 @@ function startSnake(canvas, toiletId) {
 
   // ── Bootstrap — wait for .bowl-frame to have real dimensions ────────────
   var ro = new ResizeObserver(function() {
+    console.log('ResizeObserver fired', Date.now());
     var bowlFrame = document.querySelector('.bowl-frame');
     if (!bowlFrame) return;
     var r = bowlFrame.getBoundingClientRect();
@@ -613,6 +614,8 @@ function startSnake(canvas, toiletId) {
       canvas.style.width  = w + 'px';
       canvas.style.height = h + 'px';
       _snakeRunning = true;
+      console.log('starting RAF loop', Date.now());
+      console.timeEnd('launchGame');
       _snakeRafId = requestAnimationFrame(loop);
       window._gameLoopRaf = _snakeRafId;
       init();
