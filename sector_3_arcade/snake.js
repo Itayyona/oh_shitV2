@@ -212,12 +212,15 @@ function startSnake(canvas, toiletId) {
 
       maybeSaveHighScore();
       updateHUD();
-      var rolls = Math.floor(score / 50);
-      localStorage.setItem('rolls', String(rolls));
-      var el1 = document.getElementById('roll-counter');
-      var el2 = document.getElementById('store-roll-count');
-      if (el1) el1.textContent = localStorage.getItem('rolls');
-      if (el2) el2.textContent = localStorage.getItem('rolls');
+      if (score > 0 && score % 50 === 0) {
+        var currentRolls = parseInt(localStorage.getItem('rolls') || '0', 10);
+        var newRolls = currentRolls + 1;
+        localStorage.setItem('rolls', String(newRolls));
+        var el1 = document.getElementById('roll-counter');
+        var el2 = document.getElementById('store-roll-count');
+        if (el1) el1.textContent = newRolls;
+        if (el2) el2.textContent = newRolls;
+      }
       placeFood();
     } else {
       snake.pop();
@@ -229,12 +232,15 @@ function startSnake(canvas, toiletId) {
       goldenFood = null;
       maybeSaveHighScore();
       updateHUD();
-      var rolls = Math.floor(score / 50);
-      localStorage.setItem('rolls', String(rolls));
-      var el1 = document.getElementById('roll-counter');
-      var el2 = document.getElementById('store-roll-count');
-      if (el1) el1.textContent = localStorage.getItem('rolls');
-      if (el2) el2.textContent = localStorage.getItem('rolls');
+      if (score > 0 && score % 50 === 0) {
+        var currentRolls = parseInt(localStorage.getItem('rolls') || '0', 10);
+        var newRolls = currentRolls + 1;
+        localStorage.setItem('rolls', String(newRolls));
+        var el1 = document.getElementById('roll-counter');
+        var el2 = document.getElementById('store-roll-count');
+        if (el1) el1.textContent = newRolls;
+        if (el2) el2.textContent = newRolls;
+      }
     }
   }
 
@@ -615,5 +621,5 @@ function startSnake(canvas, toiletId) {
       setTimeout(tryStart, 50);
     }
   }
-  setTimeout(tryStart, 500);
+  setTimeout(tryStart, 100);
 }
