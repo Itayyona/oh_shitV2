@@ -583,16 +583,25 @@ function startSnake(canvas, toiletId) {
 
   // ── Bootstrap — poll until canvas has real dimensions ────────────────────
   function tryStart() {
-    var r = canvas.getBoundingClientRect();
-    if (r.width > 10 && r.height > 10) {
-      canvas.width  = Math.round(r.width);
-      canvas.height = Math.round(r.height);
+    var bowlFrame = document.querySelector('.bowl-frame');
+    var target = bowlFrame || canvas;
+    var r = target.getBoundingClientRect();
+    var w = Math.round(r.width);
+    var h = Math.round(r.height);
+    console.log('bowl-frame rect:', JSON.stringify(r), 'canvas rect:', JSON.stringify(canvas.getBoundingClientRect()));
+    if (w > 10 && h > 10) {
+      canvas.width  = w;
+      canvas.height = h;
+      canvas.style.width  = w + 'px';
+      canvas.style.height = h + 'px';
       init();
-      _snakeRafId         = requestAnimationFrame(loop);
+      _snakeRunning = true;
+      _snakeRafId = requestAnimationFrame(loop);
       window._gameLoopRaf = _snakeRafId;
     } else {
+      console.log('waiting for canvas... w=' + w + ' h=' + h);
       setTimeout(tryStart, 50);
     }
   }
-  tryStart();
+  setTimeout(tryStart, 500);
 }
