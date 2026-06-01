@@ -470,7 +470,7 @@ function launchGame(gameType) {
         if (gameType === 'tetris' && typeof startTetris === 'function') startTetris(canvas, currentToiletId);
         if (gameType === 'pacman' && typeof startPacman === 'function') startPacman(canvas, currentToiletId);
         if (gameType === 'mario' && typeof startMario === 'function') startMario(canvas, currentToiletId);
-    }, 600);
+    }, 0);
 }
 
 function exitGame() {
