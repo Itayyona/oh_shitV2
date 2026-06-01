@@ -475,6 +475,7 @@ function launchGame(gameType) {
 
 function exitGame() {
     stopCurrentGame();
+    updateRollDisplay(false);
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('game-select').style.display = 'flex';
 }

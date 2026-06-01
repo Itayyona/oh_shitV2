@@ -212,6 +212,12 @@ function startSnake(canvas, toiletId) {
 
       maybeSaveHighScore();
       updateHUD();
+      var rolls = Math.floor(score / 50);
+      localStorage.setItem('rolls', String(rolls));
+      var el1 = document.getElementById('roll-counter');
+      var el2 = document.getElementById('store-roll-count');
+      if (el1) el1.textContent = localStorage.getItem('rolls');
+      if (el2) el2.textContent = localStorage.getItem('rolls');
       placeFood();
     } else {
       snake.pop();
@@ -223,6 +229,12 @@ function startSnake(canvas, toiletId) {
       goldenFood = null;
       maybeSaveHighScore();
       updateHUD();
+      var rolls = Math.floor(score / 50);
+      localStorage.setItem('rolls', String(rolls));
+      var el1 = document.getElementById('roll-counter');
+      var el2 = document.getElementById('store-roll-count');
+      if (el1) el1.textContent = localStorage.getItem('rolls');
+      if (el2) el2.textContent = localStorage.getItem('rolls');
     }
   }
 
