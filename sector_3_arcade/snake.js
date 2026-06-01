@@ -1,390 +1,526 @@
-﻿// ── SNAKE — Oh Sh*t Edition ──
-// Drop this file at: sector_3_arcade/snake.js
+// ── SNAKE — Oh Sh*t Edition ──
 
-var snakeState = null;
+var snakeState  = null;
+var _snakeRafId = null;
 
 function stopSnake() {
-    if (snakeState) {
-        if (snakeState.canvas) {
-            snakeState.canvas.removeEventListener('touchstart', snakeState.touchStartHandler);
-            snakeState.canvas.removeEventListener('touchend', snakeState.touchEndHandler);
-        }
-        if (snakeState._gbInputHandler) {
-            window.removeEventListener('gbinput', snakeState._gbInputHandler);
-            snakeState._gbInputHandler = null;
-        }
-        snakeState = null;
-    }
-    if (window._gameLoopRaf) {
-        cancelAnimationFrame(window._gameLoopRaf);
+    if (_snakeRafId) {
+        cancelAnimationFrame(_snakeRafId);
+        _snakeRafId         = null;
         window._gameLoopRaf = null;
     }
-    window._gameLoop = null;
+    if (snakeState) {
+        snakeState.canvas.removeEventListener('touchstart', snakeState._touchStart);
+        snakeState.canvas.removeEventListener('touchend',   snakeState._touchEnd);
+        window.removeEventListener('gbinput', snakeState._gbHandler);
+        snakeState = null;
+    }
 }
-
 
 function startSnake(canvas, toiletId) {
     stopSnake();
 
-    // Canvas sized from the rendered toilet bowl after layout is fully visible
+    // Size canvas from the rendered toilet bowl
     var bowl = document.getElementById('toilet-bowl');
     var rect = bowl.getBoundingClientRect();
     canvas.width  = Math.floor(rect.width);
     canvas.height = Math.floor(rect.height);
-    canvas.style.width  = canvas.width  + 'px';
-    canvas.style.height = canvas.height + 'px';
 
-    var ctx  = canvas.getContext('2d');
-    var cell = Math.floor(canvas.width / 20);
-    var cols = 20;
-    var rows = Math.max(8, Math.floor(canvas.height / cell));
+    var ctx = canvas.getContext('2d');
 
-    // Centre the grid in the canvas
-    var offsetX = Math.floor((canvas.width  - cols * cell) / 2);
-    var offsetY = Math.floor((canvas.height - rows * cell) / 2);
+    // ── Constants ────────────────────────────────────────────────
+    var CELL           = 24;
+    var SEG_DARK       = '#7B4A2D';
+    var SEG_ALT        = '#5C3318';
+    var BASE_FPM       = 18;   // frames per move at start
+    var MIN_FPM        = 6;
+    var FOOD_PER_LEVEL = 5;
 
-    var bestScore = Number(localStorage.getItem('snake_best') || 0);
+    // ── Pixel/grid state ─────────────────────────────────────────
+    var W    = canvas.width;
+    var H    = canvas.height;
+    var cols = Math.floor(W / CELL);
+    var rows = Math.floor(H / CELL);
 
-    snakeState = {
-        canvas: canvas,
-        ctx: ctx,
-        toiletId: toiletId,
-        cols: cols,
-        rows: rows,
-        cell: cell,
-        offsetX: offsetX,
-        offsetY: offsetY,
-        score: 0,
-        level: 1,
-        cells: [],
-        food: null,
-        direction: { x: 1, y: 0 },
-        nextDirection: { x: 1, y: 0 },   // applied once per move tick (fixes false self-collision)
-        queuedDirections: [],
-        lastTouchX: 0,
-        lastTouchY: 0,
-        frameCount: 0,
-        moveEveryFrames: 18,              // ~3.3 moves/sec at 60fps — comfortable on mobile
-        maxCells: 4,
-        gameOver: false,
-        running: true,
-        bestScore: bestScore,
-        touchStartHandler: null,
-        touchEndHandler: null,
-        _gbInputHandler: null,
+    // ── Game state ───────────────────────────────────────────────
+    var snake, dir, nextDir, food;
+    var score, eaten, level, lives, fpm, frame;
+    var gameState;   // 'play' | 'over'
+    var touchX, touchY;
+    var swirlAngle = 0;
 
-        saveBestScore: function () {
-            if (this.score > this.bestScore) {
-                this.bestScore = this.score;
-                localStorage.setItem('snake_best', String(this.bestScore));
-            }
-        },
+    var deathFlash = 0, deathTextTimer = 0, respawnPause = 0, levelUpTimer = 0;
+    var goldenFood = null, goldenMilestone = 0;
+    var highScore  = parseInt(localStorage.getItem('snake_best') || '0', 10);
 
-        // Award 🧻 rolls to the global counter
-        addRolls: function (amount) {
-            var current = Number(localStorage.getItem('rolls') || 0);
-            var next    = current + amount;
-            localStorage.setItem('rolls', String(next));
-            // Update HUD counters if they exist
-            var el1 = document.getElementById('roll-counter');
-            var el2 = document.getElementById('store-roll-count');
-            if (el1) el1.textContent = next;
-            if (el2) el2.textContent = next;
+    // ── HUD / economy helpers ────────────────────────────────────
+    function updateHUD() {
+        if (typeof updateGameHUD === 'function') updateGameHUD(level, score);
+    }
+
+    function maybeSaveHighScore() {
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('snake_best', String(highScore));
         }
-    };
+    }
 
-    // ── helpers ──────────────────────────────────────────────────
+    function awardRolls(amount) {
+        if (typeof addRolls === 'function') {
+            addRolls(amount);
+        } else {
+            var n = Number(localStorage.getItem('rolls') || 0) + amount;
+            localStorage.setItem('rolls', String(n));
+            var el = document.getElementById('roll-counter');
+            if (el) el.textContent = n;
+        }
+    }
 
-    function resetGame() {
-        snakeState.score           = 0;
-        snakeState.level           = 1;
-        snakeState.maxCells        = 4;
-        snakeState.direction       = { x: 1, y: 0 };
-        snakeState.nextDirection   = { x: 1, y: 0 };
-        snakeState.queuedDirections = [];
-        snakeState.gameOver        = false;
-        snakeState.running         = true;
-        snakeState.frameCount      = 0;
-        snakeState.moveEveryFrames = 18;
+    // ── Init / spawn ─────────────────────────────────────────────
+    function init() {
+        score = 0; eaten = 0; level = 1; lives = 3;
+        fpm = BASE_FPM; frame = 0; gameState = 'play';
+        deathFlash = 0; deathTextTimer = 0; respawnPause = 0; levelUpTimer = 0;
+        goldenFood = null; goldenMilestone = 0; swirlAngle = 0;
+        updateHUD();
         spawnSnake();
-        spawnFood();
-        if (typeof updateGameHUD === 'function') updateGameHUD(1, 0);
+        placeFood();
     }
 
     function spawnSnake() {
-        var startX = Math.floor((snakeState.cols - 1) / 2);
-        var startY = Math.floor((snakeState.rows - 1) / 2);
-        snakeState.cells = [];
-        for (var i = 0; i < snakeState.maxCells; i++) {
-            snakeState.cells.push({ x: startX - i, y: startY });
+        var cx = Math.max(3, Math.floor(cols / 2));
+        var cy = Math.max(0, Math.floor(rows / 2));
+        snake   = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
+        dir     = { x: 1, y: 0 };
+        nextDir = { x: 1, y: 0 };
+        frame   = 0;
+    }
+
+    // ── Lives ─────────────────────────────────────────────────────
+    function loseLife() {
+        if (gameState !== 'play') return;
+        lives = Math.max(0, lives - 1);
+        maybeSaveHighScore();
+        updateHUD();
+        deathFlash     = 30;   // ~500 ms red flash
+        deathTextTimer = 70;   // ~1.2 s "-1 LIFE" text
+        if (lives <= 0) {
+            gameState = 'over';
+        } else {
+            respawnPause = 90; // 1.5 s freeze before snake moves
+            spawnSnake();
+            placeFood();
         }
     }
 
-    function spawnFood() {
-        for (var attempt = 0; attempt < 200; attempt++) {
-            var fx = Math.floor(Math.random() * snakeState.cols);
-            var fy = Math.floor(Math.random() * snakeState.rows);
-            var occupied = false;
-            for (var j = 0; j < snakeState.cells.length; j++) {
-                if (snakeState.cells[j].x === fx && snakeState.cells[j].y === fy) {
-                    occupied = true;
-                    break;
+    // ── Food placement ────────────────────────────────────────────
+    function placeFood() {
+        var p, tries = 0;
+        do {
+            p = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
+            tries++;
+        } while (tries < 3000 && snake.some(function(s){ return s.x === p.x && s.y === p.y; }));
+        food = p;
+    }
+
+    function spawnGoldenFood() {
+        var p, tries = 0;
+        do {
+            p = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
+            tries++;
+        } while (tries < 3000 && (
+            snake.some(function(s){ return s.x === p.x && s.y === p.y; }) ||
+            (food && p.x === food.x && p.y === food.y)
+        ));
+        goldenFood = { x: p.x, y: p.y, timeLeft: 10, tickTimer: 60, moveTimer: 120 };
+    }
+
+    function relocateGoldenFood() {
+        if (!goldenFood) return;
+        var p, tries = 0;
+        do {
+            p = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
+            tries++;
+        } while (tries < 500 && (
+            snake.some(function(s){ return s.x === p.x && s.y === p.y; }) ||
+            (food && p.x === food.x && p.y === food.y)
+        ));
+        goldenFood.x = p.x;
+        goldenFood.y = p.y;
+    }
+
+    // ── Step (one snake move) ─────────────────────────────────────
+    function step() {
+        dir = { x: nextDir.x, y: nextDir.y };
+        var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+        var body = snake.slice(0, snake.length - 1); // tail will vacate this tick
+
+        if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows ||
+            body.some(function(s){ return s.x === head.x && s.y === head.y; })) {
+            loseLife();
+            return;
+        }
+
+        snake.unshift(head);
+
+        // Normal food
+        if (head.x === food.x && head.y === food.y) {
+            eaten++;
+            score += 10;
+
+            var newLevel = Math.floor(eaten / FOOD_PER_LEVEL) + 1;
+            if (newLevel > level) {
+                level    = newLevel;
+                fpm      = Math.max(MIN_FPM, BASE_FPM - (level - 1) * 2);
+                levelUpTimer = 80;
+                awardRolls(1);
+
+                // Spawn golden TP every 5 levels
+                var milestone = Math.floor(level / 5);
+                if (milestone > goldenMilestone && level % 5 === 0) {
+                    goldenMilestone = milestone;
+                    spawnGoldenFood();
                 }
             }
-            if (!occupied) { snakeState.food = { x: fx, y: fy }; return; }
-        }
-        snakeState.food = { x: 0, y: 0 };
-    }
 
-    function isOpposite(a, b) {
-        return a.x === -b.x && a.y === -b.y;
-    }
-
-    function queueDirection(dir) {
-        if (!dir) return;
-        var last = snakeState.queuedDirections.length
-            ? snakeState.queuedDirections[snakeState.queuedDirections.length - 1]
-            : snakeState.direction;
-        if (isOpposite(dir, last)) return;
-        if (snakeState.queuedDirections.length > 2) snakeState.queuedDirections.shift();
-        snakeState.queuedDirections.push(dir);
-    }
-
-    function wrap(v, max) {
-        if (v < 0) return max - 1;
-        if (v >= max) return 0;
-        return v;
-    }
-
-    // ── move ─────────────────────────────────────────────────────
-
-    function moveSnake() {
-        if (snakeState.gameOver) return;
-
-        // Consume queued direction
-        if (snakeState.queuedDirections.length) {
-            var next = snakeState.queuedDirections.shift();
-            if (!isOpposite(next, snakeState.direction)) {
-                snakeState.direction = next;
-            }
+            maybeSaveHighScore();
+            updateHUD();
+            placeFood();
+        } else {
+            snake.pop();
         }
 
-        var head = snakeState.cells[0];
-        var nextHead = {
-            x: wrap(head.x + snakeState.direction.x, snakeState.cols),
-            y: wrap(head.y + snakeState.direction.y, snakeState.rows)
-        };
-
-        // Self-collision: skip the last tail cell (it will move away this tick)
-        var checkLen = snakeState.cells.length - 1;
-        for (var i = 0; i < checkLen; i++) {
-            if (snakeState.cells[i].x === nextHead.x && snakeState.cells[i].y === nextHead.y) {
-                snakeState.gameOver = true;
-                snakeState.running  = false;
-                snakeState.saveBestScore();
-                return;
-            }
-        }
-
-        snakeState.cells.unshift(nextHead);
-
-        // Ate food?
-        if (snakeState.food && nextHead.x === snakeState.food.x && nextHead.y === snakeState.food.y) {
-            snakeState.maxCells++;
-            snakeState.score += 10;
-            snakeState.saveBestScore();
-
-            // Award 1 🧻 roll every 50 points
-            if (snakeState.score % 50 === 0) {
-                snakeState.addRolls(1);
-            }
-
-            // Level up every 5 food eaten (maxCells grows from 4, so level = floor((maxCells-4)/5)+1)
-            snakeState.level = Math.floor((snakeState.maxCells - 4) / 5) + 1;
-
-            // Speed up: start at 18 frames, drop 1 per level, floor at 6
-            snakeState.moveEveryFrames = Math.max(6, 18 - (snakeState.level - 1));
-
-            if (typeof updateGameHUD === 'function') updateGameHUD(snakeState.level, snakeState.score);
-            spawnFood();
-        }
-
-        if (snakeState.cells.length > snakeState.maxCells) {
-            snakeState.cells.pop();
+        // Golden food — bonus points, snake doesn't grow
+        if (goldenFood && head.x === goldenFood.x && head.y === goldenFood.y) {
+            score += 100;
+            awardRolls(2);
+            goldenFood = null;
+            maybeSaveHighScore();
+            updateHUD();
         }
     }
 
-    // ── draw ─────────────────────────────────────────────────────
+    // ── Drawing helpers ───────────────────────────────────────────
+    function fillRR(x, y, w, h, r) {
+        r = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y,     x + w, y + r,     r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x,     y + h, x,     y + h - r, r);
+        ctx.lineTo(x,     y + r);
+        ctx.arcTo(x,     y,     x + r, y,         r);
+        ctx.closePath();
+        ctx.fill();
+    }
 
+    // ── Water background with animated bezier swirls ──────────────
+    function drawWater() {
+        var g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
+        g.addColorStop(0,    '#5bc8f0');
+        g.addColorStop(0.40, '#1a9fd4');
+        g.addColorStop(1,    '#0d6e9e');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+
+        swirlAngle += 0.006;
+        var cx = W / 2, cy = H / 2, m = Math.min(W, H);
+        ctx.save();
+        ctx.lineCap = 'round';
+
+        // 3 clockwise outer swirl arms
+        for (var i = 0; i < 3; i++) {
+            var a = swirlAngle + i * (Math.PI * 2 / 3);
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth   = 3;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * m * 0.40, cy + Math.sin(a) * m * 0.40);
+            ctx.bezierCurveTo(
+                cx + Math.cos(a + 0.75) * m * 0.26, cy + Math.sin(a + 0.75) * m * 0.26,
+                cx + Math.cos(a + 1.65) * m * 0.14, cy + Math.sin(a + 1.65) * m * 0.14,
+                cx + Math.cos(a + 2.60) * m * 0.05, cy + Math.sin(a + 2.60) * m * 0.05
+            );
+            ctx.stroke();
+        }
+
+        // 4 counter-clockwise inner ripples
+        for (var j = 0; j < 4; j++) {
+            var b = -swirlAngle * 0.65 + j * (Math.PI * 2 / 4);
+            ctx.strokeStyle = 'rgba(255,255,255,0.20)';
+            ctx.lineWidth   = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(b) * m * 0.28, cy + Math.sin(b) * m * 0.28);
+            ctx.bezierCurveTo(
+                cx + Math.cos(b + 1.05) * m * 0.16, cy + Math.sin(b + 1.05) * m * 0.16,
+                cx + Math.cos(b + 2.10) * m * 0.08, cy + Math.sin(b + 2.10) * m * 0.08,
+                cx, cy
+            );
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // ── Snake body ────────────────────────────────────────────────
+    function drawSegment(seg, idx) {
+        var px = seg.x * CELL + 2, py = seg.y * CELL + 2;
+        var sz = CELL - 4;
+        ctx.fillStyle = idx % 2 === 0 ? SEG_DARK : SEG_ALT;
+        fillRR(px, py, sz, sz, 4);
+        // Specular sheen
+        ctx.fillStyle = 'rgba(255,200,150,0.10)';
+        fillRR(px + 1, py + 1, sz * 0.52, sz * 0.36, 2);
+    }
+
+    // Mr Hankey head — drawn facing +x in local space, then rotated
+    function drawHead(seg) {
+        var hx = seg.x * CELL + CELL / 2;
+        var hy = seg.y * CELL + CELL / 2;
+        var r  = CELL * 0.54;
+
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.rotate(
+            dir.x ===  1 ?  0 :
+            dir.x === -1 ?  Math.PI :
+            dir.y === -1 ? -Math.PI / 2 : Math.PI / 2
+        );
+
+        ctx.fillStyle = SEG_DARK;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        var er = CELL * 0.12;
+        var ex = r * 0.18, ey = r * 0.32;
+        ctx.fillStyle = 'white';
+        ctx.beginPath(); ctx.arc(ex, -ey, er, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex,  ey, er, 0, Math.PI * 2); ctx.fill();
+
+        var pr = er * 0.62;
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(ex + er * 0.18, -ey + er * 0.18, pr, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex + er * 0.18,  ey + er * 0.18, pr, 0, Math.PI * 2); ctx.fill();
+
+        ctx.strokeStyle = 'rgba(22,6,1,0.92)';
+        ctx.lineWidth   = Math.max(1.5, r * 0.18);
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.arc(r * 0.06, r * 0.16, r * 0.40, Math.PI * 0.10, Math.PI * 0.90);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    // ── Food ──────────────────────────────────────────────────────
+    function drawFood() {
+        ctx.font         = CELL + 'px serif';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🧻', food.x * CELL + CELL / 2, food.y * CELL + CELL / 2);
+    }
+
+    // Golden TP — glow + emoji + countdown (appears every 5 levels)
+    function drawGoldenFood() {
+        if (!goldenFood) return;
+        var fx = goldenFood.x * CELL + CELL / 2;
+        var fy = goldenFood.y * CELL + CELL / 2;
+
+        var pulse = 0.5 + 0.5 * Math.sin(Date.now() / 180);
+        ctx.fillStyle = 'rgba(255,215,0,' + (0.18 * pulse) + ')';
+        ctx.beginPath(); ctx.arc(fx, fy, CELL * 0.92, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,215,0,0.42)';
+        ctx.beginPath(); ctx.arc(fx, fy, CELL * 0.62, 0, Math.PI * 2); ctx.fill();
+
+        ctx.font = CELL + 'px serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('🧻', fx, fy);
+
+        var tSz = Math.max(10, CELL * 0.50);
+        ctx.font         = 'bold ' + tSz + 'px monospace';
+        ctx.textBaseline = 'bottom';
+        ctx.strokeStyle  = 'rgba(0,0,0,0.9)';
+        ctx.lineWidth    = 3;
+        ctx.strokeText(goldenFood.timeLeft + 's', fx, fy - CELL * 0.50);
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText(goldenFood.timeLeft + 's', fx, fy - CELL * 0.50);
+    }
+
+    // ── Notification overlay ──────────────────────────────────────
+    function drawNotif(line1, line2, alpha) {
+        if (alpha <= 0) return;
+        ctx.save();
+        ctx.globalAlpha  = Math.min(1, alpha);
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+
+        var sz = Math.min(22, W * 0.07);
+        var bw = W * 0.78, bh = sz * (line2 ? 3.4 : 2.2);
+        ctx.fillStyle = 'rgba(0,0,0,0.68)';
+        fillRR(W / 2 - bw / 2, H / 2 - bh / 2, bw, bh, 14);
+
+        ctx.font        = 'bold ' + sz + 'px "Courier New", monospace';
+        ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+        ctx.lineWidth   = 3;
+        var y1 = line2 ? H / 2 - sz * 0.65 : H / 2;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeText(line1, W / 2, y1); ctx.fillText(line1, W / 2, y1);
+
+        if (line2) {
+            var sz2 = Math.floor(sz * 0.72);
+            ctx.font      = 'bold ' + sz2 + 'px "Courier New", monospace';
+            ctx.fillStyle = '#FFD700';
+            ctx.strokeText(line2, W / 2, H / 2 + sz * 0.95);
+            ctx.fillText(line2,   W / 2, H / 2 + sz * 0.95);
+        }
+        ctx.restore();
+    }
+
+    // ── Game-over screen ──────────────────────────────────────────
+    function drawGameOver() {
+        ctx.fillStyle = 'rgba(0,0,0,0.74)';
+        ctx.fillRect(0, 0, W, H);
+
+        var mx = W / 2, my = H / 2;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+        var big = Math.min(24, W * 0.08);
+        ctx.font      = 'bold ' + big + 'px "Courier New", monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('💩 GAME OVER', mx, my - big * 1.9);
+
+        var med = Math.min(16, W * 0.055);
+        ctx.font      = 'bold ' + med + 'px "Courier New", monospace';
+        ctx.fillStyle = '#00ff44';
+        ctx.fillText('SCORE: ' + score, mx, my - med * 0.5);
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText('BEST:  ' + highScore, mx, my + med * 1.5);
+
+        ctx.font      = Math.min(11, W * 0.037) + 'px monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.58)';
+        ctx.fillText('tap or [A] to restart', mx, my + big * 1.9);
+    }
+
+    // ── Main draw ─────────────────────────────────────────────────
     function draw() {
-        var c  = snakeState.ctx;
-        var W  = snakeState.canvas.width;
-        var H  = snakeState.canvas.height;
-        var cl = snakeState.cell;
-        var ox = snakeState.offsetX;
-        var oy = snakeState.offsetY;
+        drawWater();
+        drawGoldenFood();
+        drawFood();
 
-        // Background — toilet water blue (#1a9fd4)
-        c.fillStyle = '#1a9fd4';
-        c.fillRect(0, 0, W, H);
+        for (var i = snake.length - 1; i >= 1; i--) drawSegment(snake[i], i);
+        drawHead(snake[0]);
 
-        // Subtle grid lines
-        c.strokeStyle = 'rgba(255,255,255,0.07)';
-        c.lineWidth = 0.5;
-        for (var col = 0; col <= snakeState.cols; col++) {
-            c.beginPath();
-            c.moveTo(ox + col * cl, oy);
-            c.lineTo(ox + col * cl, oy + snakeState.rows * cl);
-            c.stroke();
-        }
-        for (var row = 0; row <= snakeState.rows; row++) {
-            c.beginPath();
-            c.moveTo(ox, oy + row * cl);
-            c.lineTo(ox + snakeState.cols * cl, oy + row * cl);
-            c.stroke();
+        if (deathFlash > 0) {
+            ctx.fillStyle = 'rgba(220,0,0,' + (deathFlash / 30 * 0.55) + ')';
+            ctx.fillRect(0, 0, W, H);
+            deathFlash--;
         }
 
-        // Food — toilet roll 🧻
-        if (snakeState.food) {
-            var fx = ox + snakeState.food.x * cl + cl / 2;
-            var fy = oy + snakeState.food.y * cl + cl / 2;
-            c.font         = Math.max(10, cl - 2) + 'px serif';
-            c.textAlign    = 'center';
-            c.textBaseline = 'middle';
-            c.fillText('🧻', fx, fy);
+        if (deathTextTimer > 0) {
+            drawNotif('💩 -1 LIFE', null, Math.min(1, deathTextTimer / 10));
+            deathTextTimer--;
         }
 
-        // Snake — pixel art, poop brown, hard square blocks
-        for (var i = snakeState.cells.length - 1; i >= 0; i--) {
-            var seg  = snakeState.cells[i];
-            var segX = ox + seg.x * cl;
-            var segY = oy + seg.y * cl;
+        if (levelUpTimer > 0) {
+            drawNotif('LEVEL UP! 🚽', 'LVL ' + level, Math.min(1, levelUpTimer / 12));
+            levelUpTimer--;
+        }
 
-            if (i === 0) {
-                // Head
-                c.fillStyle = '#7B4A2D';
-                c.fillRect(segX + 1, segY + 1, cl - 2, cl - 2);
+        if (gameState === 'over') drawGameOver();
+    }
 
-                // Pixel art eyes — 2×2 blocks, direction-aware
-                var es  = Math.max(2, Math.floor(cl * 0.18));
-                var ep  = Math.max(2, Math.floor(cl * 0.22));
-                var dir = snakeState.direction;
-                var e1x, e1y, e2x, e2y;
+    // ── Game loop ─────────────────────────────────────────────────
+    function loop() {
+        if (!snakeState) return;  // guard: stopSnake() was called
 
-                if (dir.x === 1) {
-                    e1x = segX + cl - ep - es; e1y = segY + ep;
-                    e2x = segX + cl - ep - es; e2y = segY + cl - ep - es;
-                } else if (dir.x === -1) {
-                    e1x = segX + ep; e1y = segY + ep;
-                    e2x = segX + ep; e2y = segY + cl - ep - es;
-                } else if (dir.y === -1) {
-                    e1x = segX + ep;           e1y = segY + ep;
-                    e2x = segX + cl - ep - es; e2y = segY + ep;
-                } else {
-                    e1x = segX + ep;           e1y = segY + cl - ep - es;
-                    e2x = segX + cl - ep - es; e2y = segY + cl - ep - es;
+        if (gameState === 'play' && goldenFood) {
+            goldenFood.tickTimer--;
+            if (goldenFood.tickTimer <= 0) {
+                goldenFood.tickTimer = 60;
+                goldenFood.timeLeft--;
+                if (goldenFood.timeLeft <= 0) goldenFood = null;
+            }
+            if (goldenFood) {
+                goldenFood.moveTimer--;
+                if (goldenFood.moveTimer <= 0) {
+                    goldenFood.moveTimer = 120;
+                    relocateGoldenFood();
                 }
-
-                c.fillStyle = '#fff';
-                c.fillRect(e1x, e1y, es, es);
-                c.fillRect(e2x, e2y, es, es);
-                c.fillStyle = '#111';
-                c.fillRect(e1x + 1, e1y + 1, es - 1, es - 1);
-                c.fillRect(e2x + 1, e2y + 1, es - 1, es - 1);
-
-            } else {
-                // Body — alternating brown shades
-                c.fillStyle = (i % 2 === 0) ? '#7B4A2D' : '#5C3420';
-                c.fillRect(segX + 1, segY + 1, cl - 2, cl - 2);
             }
         }
 
-        // Game over overlay
-        if (snakeState.gameOver) {
-            c.fillStyle = 'rgba(0,0,0,0.78)';
-            c.fillRect(0, 0, W, H);
-
-            c.textAlign    = 'center';
-            c.textBaseline = 'middle';
-
-            c.fillStyle = '#ff4444';
-            c.font      = 'bold ' + Math.max(16, Math.round(H * 0.09)) + 'px "Courier New",monospace';
-            c.fillText('GAME OVER 💩', W / 2, H * 0.32);
-
-            c.fillStyle = '#7fff00';
-            c.font      = Math.max(11, Math.round(H * 0.055)) + 'px "Courier New",monospace';
-            c.fillText('SCORE:' + snakeState.score + '  BEST:' + snakeState.bestScore, W / 2, H * 0.50);
-
-            c.fillStyle = '#facc15';
-            c.font      = Math.max(10, Math.round(H * 0.045)) + 'px "Courier New",monospace';
-            c.fillText('TAP OR [A] TO RESTART', W / 2, H * 0.66);
+        if (gameState === 'play') {
+            if (respawnPause > 0) {
+                respawnPause--;
+            } else if (++frame >= fpm) {
+                frame = 0;
+                step();
+            }
         }
-    }
 
-    // ── game loop ─────────────────────────────────────────────────
-
-    function frameLoop() {
-        if (!snakeState) return;
-        window._gameLoopRaf = requestAnimationFrame(frameLoop);
-        snakeState.frameCount++;
-        if (snakeState.running && snakeState.frameCount % snakeState.moveEveryFrames === 0) {
-            moveSnake();
-        }
         draw();
+        _snakeRafId         = requestAnimationFrame(loop);
+        window._gameLoopRaf = _snakeRafId;
     }
 
-    // ── input handlers ────────────────────────────────────────────
+    // ── Input ─────────────────────────────────────────────────────
+    var UP    = { x:  0, y: -1 };
+    var DOWN  = { x:  0, y:  1 };
+    var LEFT  = { x: -1, y:  0 };
+    var RIGHT = { x:  1, y:  0 };
+
+    function turn(d) {
+        if (gameState === 'over') { init(); return; }
+        if (d.x !== -dir.x || d.y !== -dir.y) nextDir = d;
+    }
 
     function handleTouchStart(e) {
         if (!e.touches || !e.touches[0]) return;
-        snakeState.lastTouchX = e.touches[0].clientX;
-        snakeState.lastTouchY = e.touches[0].clientY;
+        e.preventDefault();
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
     }
 
     function handleTouchEnd(e) {
         if (!e.changedTouches || !e.changedTouches[0]) return;
-        var t  = e.changedTouches[0];
-        var dx = t.clientX - snakeState.lastTouchX;
-        var dy = t.clientY - snakeState.lastTouchY;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 30) {
-            if (snakeState.gameOver) resetGame();
-            return;
-        }
-        var dir;
-        if (Math.abs(dx) > Math.abs(dy)) {
-            dir = dx < 0 ? { x: -1, y: 0 } : { x: 1, y: 0 };
-        } else {
-            dir = dy < 0 ? { x: 0, y: -1 } : { x: 0, y: 1 };
-        }
-        queueDirection(dir);
+        e.preventDefault();
+        var dx = e.changedTouches[0].clientX - touchX;
+        var dy = e.changedTouches[0].clientY - touchY;
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { if (gameState === 'over') init(); return; }
+        turn(Math.abs(dx) > Math.abs(dy)
+            ? (dx > 0 ? RIGHT : LEFT)
+            : (dy > 0 ? DOWN  : UP));
     }
 
     function handleGbInput(e) {
         if (!snakeState) return;
         var d = e.detail;
-        if (d === 'stop') { stopSnake(); return; }
-        if (snakeState.gameOver) {
-            if (d === 'a' || d === 'start' || d === 'select') resetGame();
-            return;
+        if (d === 'stop')                                           { stopSnake(); return; }
+        if (d === 'a' || d === 'b' || d === 'start' || d === 'select') {
+            if (gameState === 'over') { init(); return; }
         }
-        var dirMap = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
-        if (dirMap[d]) queueDirection(dirMap[d]);
+        var dirMap = { up: UP, down: DOWN, left: LEFT, right: RIGHT };
+        if (dirMap[d]) turn(dirMap[d]);
     }
 
-    // ── kick it off ───────────────────────────────────────────────
-
-    spawnSnake();
-    spawnFood();
-    if (typeof updateGameHUD === 'function') updateGameHUD(1, 0);
-
-    snakeState.touchStartHandler = handleTouchStart;
-    snakeState.touchEndHandler   = handleTouchEnd;
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchend',   handleTouchEnd,   { passive: false });
-
-    snakeState._gbInputHandler = handleGbInput;
     window.addEventListener('gbinput', handleGbInput);
 
-    window._gameLoopRaf = requestAnimationFrame(frameLoop);
+    // Store refs for cleanup in stopSnake()
+    snakeState = {
+        canvas:      canvas,
+        toiletId:    toiletId,
+        _touchStart: handleTouchStart,
+        _touchEnd:   handleTouchEnd,
+        _gbHandler:  handleGbInput
+    };
+
+    // ── Boot ──────────────────────────────────────────────────────
+    init();
+    _snakeRafId         = requestAnimationFrame(loop);
+    window._gameLoopRaf = _snakeRafId;
 }
