@@ -452,8 +452,6 @@ function closeGameSelect() {
 }
 
 function launchGame(gameType) {
-    console.time('launchGame');
-    console.log('launchGame called', Date.now());
     document.getElementById('game-select').style.display = 'none';
     document.getElementById('game-screen').style.display = 'flex';
     var lvl = document.getElementById('hud-level');
@@ -468,7 +466,6 @@ function launchGame(gameType) {
             canvas.width  = Math.floor(rect.width);
             canvas.height = Math.floor(rect.height);
         }
-        console.log('calling startSnake', Date.now());
         if (gameType === 'snake' && typeof startSnake === 'function') startSnake(canvas, currentToiletId);
         if (gameType === 'tetris' && typeof startTetris === 'function') startTetris(canvas, currentToiletId);
         if (gameType === 'pacman' && typeof startPacman === 'function') startPacman(canvas, currentToiletId);

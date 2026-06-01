@@ -27,7 +27,6 @@ function startSnake(canvas, toiletId) {
   const elBest  = document.getElementById('hud-best')  || { textContent: '' };
   const elLives = document.getElementById('hud-lives') || { textContent: '' };
   const elLevel = document.getElementById('hud-level') || document.getElementById('gb-level');
-  console.log('elLevel (id=hud-level):', elLevel);
 
   // ── Constants ─────────────────────────────────────────────────────────────
   const CELL           = 24;
@@ -77,7 +76,6 @@ function startSnake(canvas, toiletId) {
     elBest.textContent  = 'BEST: ' + (highScore || 0);
     elLives.textContent = '💩'.repeat(Math.max(0, lives || 0));
 
-    console.log('level:', level);
     const lvl = level || 1;
     elLevel.textContent = 'LVL: ' + lvl;
   }
@@ -600,22 +598,22 @@ function startSnake(canvas, toiletId) {
   });
 
   // ── Bootstrap — wait for .bowl-frame to have real dimensions ────────────
+  var _roStarted = false;
   var ro = new ResizeObserver(function() {
-    console.log('ResizeObserver fired', Date.now());
+    if (_roStarted) { ro.disconnect(); return; }
     var bowlFrame = document.querySelector('.bowl-frame');
     if (!bowlFrame) return;
     var r = bowlFrame.getBoundingClientRect();
     var w = Math.round(r.width);
     var h = Math.round(r.height);
     if (w > 10 && h > 10) {
+      _roStarted = true;
       ro.disconnect();
       canvas.width  = w;
       canvas.height = h;
       canvas.style.width  = w + 'px';
       canvas.style.height = h + 'px';
       _snakeRunning = true;
-      console.log('starting RAF loop', Date.now());
-      console.timeEnd('launchGame');
       _snakeRafId = requestAnimationFrame(loop);
       window._gameLoopRaf = _snakeRafId;
       init();
