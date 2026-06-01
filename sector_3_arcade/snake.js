@@ -1,13 +1,32 @@
-(function () {
+// ── SNAKE — Oh Sh*t Edition ──
+// snake-test logic wrapped for use with sector_3_arcade
+
+var _snakeRafId   = null;
+var _snakeRunning = false;
+
+function stopSnake() {
+  _snakeRunning = false;
+  if (_snakeRafId !== null) {
+    cancelAnimationFrame(_snakeRafId);
+    _snakeRafId = null;
+  }
+  window._gameLoopRaf = null;
+  window._gameLoop    = null;
+}
+
+function startSnake(canvas, toiletId) {
+  stopSnake();
+  _snakeRunning = true;
+
   'use strict';
 
   // ── DOM ───────────────────────────────────────────────────────────────────
-  const canvas  = document.getElementById('gameCanvas');
+  // canvas is passed as a parameter — do not query gameCanvas from DOM
   const ctx     = canvas.getContext('2d');
-  const elScore = document.getElementById('hud-score');
-  const elBest  = document.getElementById('hud-best');
-  const elLives = document.getElementById('hud-lives');
-  const elLevel = document.getElementById('hud-level');
+  const elScore = document.getElementById('hud-score') || document.getElementById('gb-score');
+  const elBest  = document.getElementById('hud-best')  || { textContent: '' };
+  const elLives = document.getElementById('hud-lives') || { textContent: '' };
+  const elLevel = document.getElementById('hud-level') || document.getElementById('gb-level');
   console.log('elLevel (id=hud-level):', elLevel);
 
   // ── Constants ─────────────────────────────────────────────────────────────
@@ -25,7 +44,6 @@
   let state;               // 'play' | 'over'
   let touchX, touchY;
   let swirlAngle = 0;
-  let started    = false;
 
   // Visual effect timers (all in animation frames)
   let deathFlash     = 0;  // red overlay countdown
@@ -465,6 +483,8 @@
 
   // ── Game loop ─────────────────────────────────────────────────────────────
   function loop() {
+    if (!_snakeRunning) return;  // guard: stopSnake() was called
+
     // Tick golden TP timers every frame
     if (state === 'play' && goldenFood) {
       goldenFood.tickTimer--;
@@ -495,7 +515,8 @@
     }
 
     draw();
-    requestAnimationFrame(loop);
+    _snakeRafId         = requestAnimationFrame(loop);
+    window._gameLoopRaf = _snakeRafId;
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────
@@ -534,7 +555,7 @@
       : (dy > 0 ? DOWN  : UP));
   }, { passive: false });
 
-  // D-pad buttons
+  // D-pad buttons (bindDir silently skips missing IDs)
   function bindDir(id, d) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -544,7 +565,7 @@
   bindDir('btn-up', UP); bindDir('btn-down', DOWN);
   bindDir('btn-left', LEFT); bindDir('btn-right', RIGHT);
 
-  // A / B buttons — restart on game over
+  // A / B buttons — restart on game over (silently skips missing IDs)
   function bindAction(id, fn) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -560,16 +581,8 @@
     if (food) placeFood();
   });
 
-  // ── Bootstrap — wait for CSS layout to give real canvas dimensions ─────────
-  const ro = new ResizeObserver(function () {
-    if (started) return;
-    const r = canvas.getBoundingClientRect();
-    if (r.width > 60 && r.height > 60) {
-      started = true;
-      init();
-      loop();
-    }
-  });
-  ro.observe(document.querySelector('.bowl-frame'));
-
-})();
+  // ── Bootstrap — canvas is already sized when startSnake() is called ───────
+  init();
+  _snakeRafId         = requestAnimationFrame(loop);
+  window._gameLoopRaf = _snakeRafId;
+}
