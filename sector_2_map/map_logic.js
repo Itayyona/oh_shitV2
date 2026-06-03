@@ -476,8 +476,7 @@ function launchGame(gameType) {
         if (pc) pc.style.display = 'flex';
 
         var screen = document.getElementById('game-screen');
-        screen.style.display = 'flex';
-        screen.style.background = '#0a0a1a';
+        screen.style.cssText = 'display:flex; position:fixed; inset:0; z-index:9999; flex-direction:column; overflow:hidden; background:#0a0a1a;';
 
         var controller = document.querySelector('.controller');
         if (controller) controller.style.display = 'flex';
