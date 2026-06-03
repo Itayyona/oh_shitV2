@@ -454,22 +454,52 @@ function closeGameSelect() {
 function launchGame(gameType) {
     document.getElementById('game-select').style.display = 'none';
     document.getElementById('game-screen').style.display = 'flex';
+
     var lvl = document.getElementById('hud-level');
     var scr = document.getElementById('hud-score');
-    if (lvl) lvl.textContent = 'LVL: 1';
-    if (scr) scr.textContent = '🧻 —';
+    var toiletTop = document.querySelector('.toilet-top');
+    var controller = document.querySelector('.controller');
     var canvas = document.getElementById('game-canvas');
+
+    if (gameType === 'snake') {
+        // Snake: show toilet bowl UI
+        if (toiletTop) toiletTop.style.display = 'flex';
+        if (controller) controller.style.display = 'flex';
+        if (lvl) lvl.textContent = 'LVL: 1';
+        if (scr) scr.textContent = '🧻 —';
+    }
+
+    if (gameType === 'pacman') {
+        // Pacman: hide toilet, full screen game + dpad only
+        if (toiletTop) toiletTop.style.display = 'none';
+        if (controller) {
+            controller.style.display = 'flex';
+            controller.style.height = '38vh';
+        }
+        // Make canvas fill remaining space
+        if (canvas) {
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100vw';
+            canvas.style.height = '62vh';
+            canvas.style.zIndex = '1';
+        }
+    }
+
     setTimeout(function() {
         var bowlFrame = document.querySelector('.bowl-frame');
-        if (bowlFrame) {
+        if (gameType === 'snake' && bowlFrame) {
             var rect = bowlFrame.getBoundingClientRect();
             canvas.width  = Math.floor(rect.width);
             canvas.height = Math.floor(rect.height);
         }
+        if (gameType === 'pacman') {
+            canvas.width  = window.innerWidth;
+            canvas.height = Math.floor(window.innerHeight * 0.62);
+        }
         if (gameType === 'snake' && typeof startSnake === 'function') startSnake(canvas, currentToiletId);
-        if (gameType === 'tetris' && typeof startTetris === 'function') startTetris(canvas, currentToiletId);
         if (gameType === 'pacman' && typeof startPacman === 'function') startPacman(canvas, currentToiletId);
-        if (gameType === 'mario' && typeof startMario === 'function') startMario(canvas, currentToiletId);
     }, 0);
 }
 
