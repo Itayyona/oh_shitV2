@@ -260,7 +260,7 @@
     <!-- GAME SCREEN — snake-test layout -->
     <div id="game-screen" style="display:none; position:fixed; inset:0; z-index:4000; flex-direction:column; overflow:hidden;">
       <div id="pacman-container" style="display:none; position:fixed; top:0; left:0; right:0; height:62vh; background:#000; z-index:10; flex-direction:column;">
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:#000; font-family:monospace; font-size:13px; color:#00ff44; flex-shrink:0; width:100%;">
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto; align-items:center; padding:6px 10px; background:#000; font-family:monospace; font-size:13px; color:#00ff44; flex-shrink:0; width:100%;">
           <span id="pac-score">SCORE: 0</span>
           <span id="pac-lives">🚽🚽🚽</span>
           <span id="pac-level">LVL: 1</span>
@@ -268,11 +268,11 @@
         </div>
         <canvas id="pacman-canvas" style="display:block; width:100vw; flex:1;"></canvas>
         <div style="flex:1; min-height:200px; flex-shrink:0; background:#1a1a1a; display:flex; align-items:center; justify-content:center;">
-          <div style="position:relative; width:240px; height:240px;">
-            <button onclick="gameInput('up')" ontouchstart="event.preventDefault(); gameInput('up')" style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▲</button>
-            <button onclick="gameInput('left')" ontouchstart="event.preventDefault(); gameInput('left')" style="position:absolute; top:50%; left:0; transform:translateY(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">◀</button>
-            <button onclick="gameInput('right')" ontouchstart="event.preventDefault(); gameInput('right')" style="position:absolute; top:50%; right:0; transform:translateY(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▶</button>
-            <button onclick="gameInput('down')" ontouchstart="event.preventDefault(); gameInput('down')" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▼</button>
+          <div style="position:relative; width:180px; height:180px;">
+            <button onclick="gameInput('up')" ontouchstart="event.preventDefault(); gameInput('up')" style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:56px; height:56px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:18px; border:none; cursor:pointer;">▲</button>
+            <button onclick="gameInput('left')" ontouchstart="event.preventDefault(); gameInput('left')" style="position:absolute; top:50%; left:0; transform:translateY(-50%); width:56px; height:56px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:18px; border:none; cursor:pointer;">◀</button>
+            <button onclick="gameInput('right')" ontouchstart="event.preventDefault(); gameInput('right')" style="position:absolute; top:50%; right:0; transform:translateY(-50%); width:56px; height:56px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:18px; border:none; cursor:pointer;">▶</button>
+            <button onclick="gameInput('down')" ontouchstart="event.preventDefault(); gameInput('down')" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:56px; height:56px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:18px; border:none; cursor:pointer;">▼</button>
           </div>
         </div>
       </div>
