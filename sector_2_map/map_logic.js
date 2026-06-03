@@ -480,6 +480,12 @@ function launchGame(gameType) {
 
         document.getElementById('map').style.zIndex = '-1';
         document.getElementById('map').style.display = 'none';
+        document.getElementById('nearest-bar') && (document.getElementById('nearest-bar').style.display = 'none');
+        document.getElementById('hud') && (document.getElementById('hud').style.display = 'none');
+        document.getElementById('add-btn') && (document.getElementById('add-btn').style.display = 'none');
+        document.getElementById('roll-btn') && (document.getElementById('roll-btn').style.display = 'none');
+        document.getElementById('recenter-btn') && (document.getElementById('recenter-btn').style.display = 'none');
+        document.getElementById('search-btn') && (document.getElementById('search-btn').style.display = 'none');
 
         var controller = document.querySelector('.controller');
         if (controller) controller.style.display = 'flex';
@@ -525,6 +531,12 @@ function exitGame() {
     }
     document.getElementById('map').style.zIndex = '';
     document.getElementById('map').style.display = 'block';
+    document.getElementById('nearest-bar') && (document.getElementById('nearest-bar').style.display = '');
+    document.getElementById('hud') && (document.getElementById('hud').style.display = '');
+    document.getElementById('add-btn') && (document.getElementById('add-btn').style.display = '');
+    document.getElementById('roll-btn') && (document.getElementById('roll-btn').style.display = '');
+    document.getElementById('recenter-btn') && (document.getElementById('recenter-btn').style.display = '');
+    document.getElementById('search-btn') && (document.getElementById('search-btn').style.display = '');
     var pc = document.getElementById('pacman-container');
     if (pc) pc.style.display = 'none';
     var toiletTop = document.querySelector('.toilet-top');
