@@ -259,6 +259,9 @@
 
     <!-- GAME SCREEN — snake-test layout -->
     <div id="game-screen" style="display:none; position:fixed; inset:0; z-index:4000; flex-direction:column; overflow:hidden;">
+      <div id="pacman-container" style="display:none; position:fixed; top:0; left:0; right:0; height:62vh; background:#000; z-index:10; flex-direction:column;">
+        <canvas id="pacman-canvas" style="display:block; flex:1;"></canvas>
+      </div>
       <div class="toilet-top">
         <div class="hud">
           <span id="hud-score">🧻 —</span>
@@ -275,9 +278,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div id="pacman-container" style="display:none; position:absolute; inset:0; background:#000; z-index:10; flex-direction:column;">
-        <canvas id="pacman-canvas" style="display:block; flex:1;"></canvas>
       </div>
       <div class="controller">
         <div class="dpad">

@@ -475,8 +475,6 @@ function launchGame(gameType) {
         var pc = document.getElementById('pacman-container');
         if (pc) {
             pc.style.display = 'flex';
-            pc.style.height = '62vh';
-            pc.style.position = 'relative';
         }
     }
 
