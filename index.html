@@ -260,13 +260,13 @@
     <!-- GAME SCREEN — snake-test layout -->
     <div id="game-screen" style="display:none; position:fixed; inset:0; z-index:4000; flex-direction:column; overflow:hidden;">
       <div id="pacman-container" style="display:none; position:fixed; top:0; left:0; right:0; height:62vh; background:#000; z-index:10; flex-direction:column;">
-        <button onclick="exitGame()" style="position:absolute; top:10px; right:10px; z-index:100; width:36px; height:36px; background:#8B0000; color:#fff; border:none; border-radius:50%; font-size:16px; cursor:pointer;">✕</button>
-        <div id="pacman-hud" style="display:flex; justify-content:space-between; align-items:center; padding:6px 40px 6px 12px; background:#000; font-family:monospace; font-size:14px; color:#00ff44; flex-shrink:0;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:#000; font-family:monospace; font-size:13px; color:#00ff44; flex-shrink:0; width:100%;">
           <span id="pac-score">SCORE: 0</span>
           <span id="pac-lives">🚽🚽🚽</span>
           <span id="pac-level">LVL: 1</span>
+          <button onclick="exitGame()" style="width:32px; height:32px; background:#8B0000; color:#fff; border:none; border-radius:50%; font-size:14px; cursor:pointer;">✕</button>
         </div>
-        <canvas id="pacman-canvas" style="display:block; flex:1;"></canvas>
+        <canvas id="pacman-canvas" style="display:block; width:100vw; flex:1;"></canvas>
         <div style="flex:1; min-height:200px; flex-shrink:0; background:#1a1a1a; display:flex; align-items:center; justify-content:center;">
           <div style="position:relative; width:240px; height:240px;">
             <button onclick="gameInput('up')" ontouchstart="event.preventDefault(); gameInput('up')" style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▲</button>
