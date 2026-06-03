@@ -478,6 +478,9 @@ function launchGame(gameType) {
         var screen = document.getElementById('game-screen');
         screen.style.cssText = 'display:flex; position:fixed; inset:0; z-index:9999; flex-direction:column; overflow:hidden; background:#0a0a1a;';
 
+        document.getElementById('map').style.zIndex = '-1';
+        document.getElementById('map').style.display = 'none';
+
         var controller = document.querySelector('.controller');
         if (controller) controller.style.display = 'flex';
 
@@ -520,6 +523,8 @@ function exitGame() {
         canvas.style.height = '';
         canvas.style.zIndex = '';
     }
+    document.getElementById('map').style.zIndex = '';
+    document.getElementById('map').style.display = 'block';
     var pc = document.getElementById('pacman-container');
     if (pc) pc.style.display = 'none';
     var toiletTop = document.querySelector('.toilet-top');
