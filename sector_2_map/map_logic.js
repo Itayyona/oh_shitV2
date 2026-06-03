@@ -474,10 +474,14 @@ function launchGame(gameType) {
         document.getElementById('game-screen').style.background = '#000';
         if (toiletTop) {
             toiletTop.style.display = 'flex';
-            toiletTop.style.position = 'relative';
             toiletTop.style.height = '62vh';
+            toiletTop.style.minHeight = '62vh';
+            toiletTop.style.width = '100%';
+            toiletTop.style.flexShrink = '0';
             toiletTop.style.background = '#000';
             toiletTop.style.padding = '0';
+            toiletTop.style.position = 'relative';
+            toiletTop.style.overflow = 'visible';
         }
         var toiletUnit = document.querySelector('.toilet-unit');
         var hud = document.querySelector('.hud');
@@ -499,6 +503,8 @@ function launchGame(gameType) {
             toiletRim.style.width = '100%';
             toiletRim.style.height = '100%';
             toiletRim.style.borderRadius = '0';
+            toiletRim.style.overflow = 'visible';
+            toiletRim.style.position = 'relative';
         }
         if (controller) {
             controller.style.display = 'flex';
