@@ -470,38 +470,23 @@ function launchGame(gameType) {
     }
 
     if (gameType === 'pacman') {
-        if (toiletTop) toiletTop.style.display = 'none';
+        document.getElementById('map').style.display = 'none';
+        ['nearest-bar','hud','add-btn','roll-btn','recenter-btn','search-btn'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        document.querySelector('.toilet-top').style.display = 'none';
 
         var pc = document.getElementById('pacman-container');
-        if (pc) pc.style.display = 'flex';
-
-        var screen = document.getElementById('game-screen');
-        screen.style.cssText = 'display:flex; position:fixed; inset:0; z-index:9999; flex-direction:column; overflow:hidden; background:#0a0a1a;';
-
-        document.getElementById('map').style.zIndex = '-1';
-        document.getElementById('map').style.display = 'none';
-        document.getElementById('nearest-bar') && (document.getElementById('nearest-bar').style.display = 'none');
-        document.getElementById('hud') && (document.getElementById('hud').style.display = 'none');
-        document.getElementById('add-btn') && (document.getElementById('add-btn').style.display = 'none');
-        document.getElementById('roll-btn') && (document.getElementById('roll-btn').style.display = 'none');
-        document.getElementById('recenter-btn') && (document.getElementById('recenter-btn').style.display = 'none');
-        document.getElementById('search-btn') && (document.getElementById('search-btn').style.display = 'none');
-
-        var controller = document.querySelector('.controller');
-        if (controller) {
-            controller.style.display = 'flex';
-            controller.style.zIndex = '9999';
-            controller.style.position = 'relative';
-        }
+        pc.style.cssText = 'display:flex; flex-direction:column; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:#0a0a1a;';
 
         setTimeout(function() {
             var pac = document.getElementById('pacman-canvas');
-            if (pac && pc) {
-                var r = pc.getBoundingClientRect();
-                pac.width  = Math.floor(r.width);
-                pac.height = Math.floor(r.height);
-                if (typeof startPacman === 'function') startPacman(pac, currentToiletId);
-            }
+            pac.width  = window.innerWidth;
+            pac.height = Math.floor(window.innerHeight * 0.62);
+            pac.style.cssText = 'display:block; width:100%; height:62vh; flex-shrink:0;';
+            if (typeof startPacman === 'function') startPacman(pac, currentToiletId);
         }, 100);
     }
 

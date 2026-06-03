@@ -267,6 +267,14 @@
           <span id="pac-level">LVL: 1</span>
         </div>
         <canvas id="pacman-canvas" style="display:block; flex:1;"></canvas>
+        <div style="flex:1; background:#1a1a1a; display:flex; align-items:center; justify-content:center;">
+          <div style="position:relative; width:240px; height:240px;">
+            <button onclick="gameInput('up')" style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▲</button>
+            <button onclick="gameInput('left')" style="position:absolute; top:50%; left:0; transform:translateY(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">◀</button>
+            <button onclick="gameInput('right')" style="position:absolute; top:50%; right:0; transform:translateY(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▶</button>
+            <button onclick="gameInput('down')" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:72px; height:72px; border-radius:14px; background:#2e2e2e; color:#fff; font-size:24px; border:none; cursor:pointer;">▼</button>
+          </div>
+        </div>
       </div>
       <div class="toilet-top">
         <div class="hud">
