@@ -478,12 +478,12 @@ function launchGame(gameType) {
         }
         // Make canvas fill remaining space
         if (canvas) {
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100vw';
-            canvas.style.height = '62vh';
-            canvas.style.zIndex = '1';
+            canvas.style.position = '';
+            canvas.style.top = '';
+            canvas.style.left = '';
+            canvas.style.width = '';
+            canvas.style.height = '';
+            canvas.style.zIndex = '';
         }
     }
 
@@ -506,6 +506,15 @@ function launchGame(gameType) {
 function exitGame() {
     stopCurrentGame();
     updateRollDisplay(false);
+    var canvas = document.getElementById('game-canvas');
+    if (canvas) {
+        canvas.style.position = '';
+        canvas.style.top = '';
+        canvas.style.left = '';
+        canvas.style.width = '';
+        canvas.style.height = '';
+        canvas.style.zIndex = '';
+    }
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('game-select').style.display = 'flex';
 }
