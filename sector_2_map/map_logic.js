@@ -470,22 +470,39 @@ function launchGame(gameType) {
     }
 
     if (gameType === 'pacman') {
-        // Pacman: hide toilet, full screen game + dpad only
         document.getElementById('game-screen').style.zIndex = '4000';
         document.getElementById('game-screen').style.background = '#000';
-        if (toiletTop) toiletTop.style.display = 'none';
+        if (toiletTop) {
+            toiletTop.style.display = 'flex';
+            toiletTop.style.position = 'relative';
+            toiletTop.style.height = '62vh';
+            toiletTop.style.background = '#000';
+            toiletTop.style.padding = '0';
+        }
+        var toiletUnit = document.querySelector('.toilet-unit');
+        var hud = document.querySelector('.hud');
+        if (toiletUnit) toiletUnit.style.display = 'none';
+        if (hud) hud.style.display = 'none';
+        var bowlFrame = document.querySelector('.bowl-frame');
+        if (bowlFrame) {
+            bowlFrame.style.position = 'absolute';
+            bowlFrame.style.top = '0';
+            bowlFrame.style.left = '0';
+            bowlFrame.style.width = '100%';
+            bowlFrame.style.height = '100%';
+            bowlFrame.style.borderRadius = '0';
+            bowlFrame.style.transform = 'none';
+            bowlFrame.style.boxShadow = 'none';
+        }
+        var toiletRim = document.querySelector('.toilet-rim');
+        if (toiletRim) {
+            toiletRim.style.width = '100%';
+            toiletRim.style.height = '100%';
+            toiletRim.style.borderRadius = '0';
+        }
         if (controller) {
             controller.style.display = 'flex';
             controller.style.height = '38vh';
-        }
-        // Make canvas fill remaining space
-        if (canvas) {
-            canvas.style.position = '';
-            canvas.style.top = '';
-            canvas.style.left = '';
-            canvas.style.width = '';
-            canvas.style.height = '';
-            canvas.style.zIndex = '';
         }
     }
 
