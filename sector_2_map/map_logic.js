@@ -506,20 +506,29 @@ function launchGame(gameType) {
         }
     }
 
-    setTimeout(function() {
-        var bowlFrame = document.querySelector('.bowl-frame');
-        if (gameType === 'snake' && bowlFrame) {
-            var rect = bowlFrame.getBoundingClientRect();
-            canvas.width  = Math.floor(rect.width);
-            canvas.height = Math.floor(rect.height);
-        }
-        if (gameType === 'pacman') {
+    if (gameType === 'snake') {
+        setTimeout(function() {
+            var bowlFrame = document.querySelector('.bowl-frame');
+            if (bowlFrame) {
+                var rect = bowlFrame.getBoundingClientRect();
+                canvas.width  = Math.floor(rect.width);
+                canvas.height = Math.floor(rect.height);
+            }
+            if (typeof startSnake === 'function') startSnake(canvas, currentToiletId);
+        }, 0);
+    }
+
+    if (gameType === 'pacman') {
+        setTimeout(function() {
             canvas.width  = window.innerWidth;
             canvas.height = Math.floor(window.innerHeight * 0.62);
-        }
-        if (gameType === 'snake' && typeof startSnake === 'function') startSnake(canvas, currentToiletId);
-        if (gameType === 'pacman' && typeof startPacman === 'function') startPacman(canvas, currentToiletId);
-    }, 0);
+            canvas.style.width  = canvas.width + 'px';
+            canvas.style.height = canvas.height + 'px';
+            if (typeof startPacman === 'function') {
+                startPacman(canvas, currentToiletId);
+            }
+        }, 100);
+    }
 }
 
 function exitGame() {
