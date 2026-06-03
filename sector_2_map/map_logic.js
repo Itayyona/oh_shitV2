@@ -473,9 +473,17 @@ function launchGame(gameType) {
         if (toiletTop) toiletTop.style.display = 'none';
 
         var pc = document.getElementById('pacman-container');
-        if (pc) {
-            pc.style.display = 'flex';
-        }
+        if (pc) pc.style.display = 'flex';
+
+        setTimeout(function() {
+            var pac = document.getElementById('pacman-canvas');
+            if (pac && pc) {
+                var r = pc.getBoundingClientRect();
+                pac.width  = Math.floor(r.width);
+                pac.height = Math.floor(r.height);
+                if (typeof startPacman === 'function') startPacman(pac, currentToiletId);
+            }
+        }, 100);
     }
 
     if (gameType === 'snake') {
@@ -490,17 +498,6 @@ function launchGame(gameType) {
         }, 0);
     }
 
-    if (gameType === 'pacman') {
-        setTimeout(function() {
-            var pac = document.getElementById('pacman-canvas');
-            if (pac) {
-                var r = pc.getBoundingClientRect();
-                pac.width  = Math.floor(r.width);
-                pac.height = Math.floor(r.height);
-                if (typeof startPacman === 'function') startPacman(pac, currentToiletId);
-            }
-        }, 100);
-    }
 }
 
 function exitGame() {
