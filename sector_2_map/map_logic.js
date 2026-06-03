@@ -498,13 +498,24 @@ function launchGame(gameType) {
             bowlFrame.style.transform = 'none';
             bowlFrame.style.boxShadow = 'none';
         }
+        var toiletOuter = document.querySelector('.toilet-outer');
+        if (toiletOuter) {
+            toiletOuter.style.flex = '1';
+            toiletOuter.style.display = 'flex';
+            toiletOuter.style.padding = '0';
+            toiletOuter.style.borderRadius = '0';
+            toiletOuter.style.background = '#000';
+        }
         var toiletRim = document.querySelector('.toilet-rim');
         if (toiletRim) {
             toiletRim.style.width = '100%';
             toiletRim.style.height = '100%';
+            toiletRim.style.flex = '1';
             toiletRim.style.borderRadius = '0';
+            toiletRim.style.background = '#000';
             toiletRim.style.overflow = 'visible';
             toiletRim.style.position = 'relative';
+            toiletRim.style.display = 'block';
         }
         if (controller) {
             controller.style.display = 'flex';
