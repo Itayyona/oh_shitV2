@@ -475,6 +475,13 @@ function launchGame(gameType) {
         var pc = document.getElementById('pacman-container');
         if (pc) pc.style.display = 'flex';
 
+        var screen = document.getElementById('game-screen');
+        screen.style.display = 'flex';
+        screen.style.background = '#0a0a1a';
+
+        var controller = document.querySelector('.controller');
+        if (controller) controller.style.display = 'flex';
+
         setTimeout(function() {
             var pac = document.getElementById('pacman-canvas');
             if (pac && pc) {
