@@ -471,6 +471,8 @@ function launchGame(gameType) {
 
     if (gameType === 'pacman') {
         // Pacman: hide toilet, full screen game + dpad only
+        document.getElementById('game-screen').style.zIndex = '4000';
+        document.getElementById('game-screen').style.background = '#000';
         if (toiletTop) toiletTop.style.display = 'none';
         if (controller) {
             controller.style.display = 'flex';
@@ -506,6 +508,8 @@ function launchGame(gameType) {
 function exitGame() {
     stopCurrentGame();
     updateRollDisplay(false);
+    document.getElementById('game-screen').style.zIndex = '';
+    document.getElementById('game-screen').style.background = '';
     var canvas = document.getElementById('game-canvas');
     if (canvas) {
         canvas.style.position = '';

@@ -335,6 +335,9 @@ body.day   .game-card-name { color:#111; }
 .game-card-best { font-size:12px; font-weight:700; color:#ff6b35; }
 
 /* ── GAME SCREEN — snake-test layout ── */
+#game-screen {
+  z-index: 4000;
+}
 
 /* ── TOP 62vh — toilet scene ─────────────────────────────────────────── */
 .toilet-top {
