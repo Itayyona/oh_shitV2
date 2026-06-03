@@ -488,7 +488,11 @@ function launchGame(gameType) {
         document.getElementById('search-btn') && (document.getElementById('search-btn').style.display = 'none');
 
         var controller = document.querySelector('.controller');
-        if (controller) controller.style.display = 'flex';
+        if (controller) {
+            controller.style.display = 'flex';
+            controller.style.zIndex = '9999';
+            controller.style.position = 'relative';
+        }
 
         setTimeout(function() {
             var pac = document.getElementById('pacman-canvas');
