@@ -364,10 +364,18 @@ function startSnake(canvas, toiletId) {
 
   // ── Food ──────────────────────────────────────────────────────────────────
   function drawFood() {
-    ctx.font         = `${CELL + 2}px serif`;
+    var fx = food.x * CELL + CELL / 2;
+    var fy = food.y * CELL + CELL / 2;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.beginPath();
+    ctx.arc(fx, fy, CELL * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font         = Math.max(16, CELL + 6) + 'px serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🧻', food.x * CELL + CELL / 2, food.y * CELL + CELL / 2);
+    ctx.fillText('🧻', fx, fy);
   }
 
   // Golden TP — glow + emoji + countdown
