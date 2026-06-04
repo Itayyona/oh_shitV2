@@ -364,7 +364,7 @@ function startSnake(canvas, toiletId) {
 
   // ── Food ──────────────────────────────────────────────────────────────────
   function drawFood() {
-    ctx.font         = `${CELL}px serif`;
+    ctx.font         = `${CELL + 2}px serif`;
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('🧻', food.x * CELL + CELL / 2, food.y * CELL + CELL / 2);
