@@ -35,6 +35,7 @@ function startSnake(canvas, toiletId) {
   const BASE_FPM       = 18;   // frames per move at start
   const MIN_FPM        = 6;
   const FOOD_PER_LEVEL = 5;    // food eaten to advance one level
+  const INITIAL_LENGTH = 3;    // snake length restored on every level-up
 
   // ── State ─────────────────────────────────────────────────────────────────
   let W, H, cols, rows;
@@ -199,6 +200,10 @@ function startSnake(canvas, toiletId) {
         level    = newLevel;
         fpm      = Math.max(MIN_FPM, BASE_FPM - (level - 1) * 2);
         levelUpTimer = 80;
+
+        // Reset to starting length so speed-ups never become unplayable —
+        // keeps this an infinite arcade loop instead of a dead end.
+        if (snake.length > INITIAL_LENGTH) snake.length = INITIAL_LENGTH;
 
         // Spawn golden TP every 5 levels
         const milestone = Math.floor(level / 5);
