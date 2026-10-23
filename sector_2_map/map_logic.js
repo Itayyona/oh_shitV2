@@ -119,11 +119,11 @@ function launchMap() {
 
     var isNight = getTheme() === 'night';
     var tileUrl = isNight
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     map = L.map('map', { zoomControl:true }).setView([31.7, 35.0], 8);
-    L.tileLayer(tileUrl, { attribution:'© OpenStreetMap contributors', maxZoom:19 }).addTo(map);
+    L.tileLayer(tileUrl, { attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom:19 }).addTo(map);
 
     clusterGroup = L.markerClusterGroup({
         maxClusterRadius: 25,
