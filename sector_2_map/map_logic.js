@@ -125,6 +125,12 @@ function launchMap() {
     map = L.map('map', { zoomControl:true }).setView([31.7, 35.0], 8);
     L.tileLayer(tileUrl, { attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom:19 }).addTo(map);
 
+    // OSM only serves light tiles — invert the tile pane at night so the map
+    // looks dark again (CARTO's dark_all tile used to do this for free).
+    map.getPane('tilePane').style.filter = isNight
+        ? 'invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9)'
+        : 'none';
+
     clusterGroup = L.markerClusterGroup({
         maxClusterRadius: 25,
         spiderfyOnMaxZoom: true,
